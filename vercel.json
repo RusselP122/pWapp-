@@ -1,0 +1,32 @@
+{
+    "headers": [
+        {
+            "source": "/(assets|images|data)/(.*)",
+            "headers": [
+                {
+                    "key": "Cache-Control",
+                    "value": "public, max-age=0, must-revalidate"
+                }
+            ]
+        }
+    ],
+    "rewrites": [
+        {
+            "source": "/api/earthquake-data",
+            "destination": "https://data.garbinwx.org/api/earthquakes.json"
+        },
+        {
+            "source": "/api/ogimet/:path*",
+            "destination": "http://www.ogimet.com/cgi-bin/:path*"
+        },
+        {
+            "source": "/api/irain/:path*",
+            "destination": "https://irain.eng.uci.edu/:path*"
+        },
+        {
+            "source": "/((?!data/|api/|assets/|images/|.*\\.[\\w]+$).*)",
+            "destination": "/index.html"
+        }
+    ],
+    "outputDirectory": "dist"
+}

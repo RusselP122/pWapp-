@@ -1,0 +1,98 @@
+{
+  "active": true,
+  "storm_name": "TC 23W",
+  "track_id": "WP232026",
+  "latest": {
+    "lat": 28.5,
+    "lon": 133.8,
+    "pressure_hpa": 998.0,
+    "wind_kt": 25.0,
+    "wind_kmh": 46,
+    "movement": "NW at 28.3 km/h (15.3 kt)",
+    "init_time": "2026-09-05 12:00",
+    "category": "Tropical Depression"
+  },
+  "history": [
+    {
+      "cycle": "2026-09-03 12:00",
+      "lat": 16.4,
+      "lon": 139.7,
+      "pressure_hpa": 1005.0,
+      "wind_kt": 19.0,
+      "wind_kmh": 35,
+      "category": "Low Pressure Area"
+    },
+    {
+      "cycle": "2026-09-03 18:00",
+      "lat": 19.2,
+      "lon": 138.2,
+      "pressure_hpa": 1003.0,
+      "wind_kt": 19.0,
+      "wind_kmh": 35,
+      "category": "Low Pressure Area"
+    },
+    {
+      "cycle": "2026-09-04 00:00",
+      "lat": 19.3,
+      "lon": 137.8,
+      "pressure_hpa": 1003.0,
+      "wind_kt": 19.0,
+      "wind_kmh": 35,
+      "category": "Low Pressure Area"
+    },
+    {
+      "cycle": "2026-09-04 06:00",
+      "lat": 20.6,
+      "lon": 137.8,
+      "pressure_hpa": 1000.0,
+      "wind_kt": 19.0,
+      "wind_kmh": 35,
+      "category": "Low Pressure Area"
+    },
+    {
+      "cycle": "2026-09-04 12:00",
+      "lat": 22.4,
+      "lon": 137.8,
+      "pressure_hpa": 996.0,
+      "wind_kt": 39.0,
+      "wind_kmh": 72,
+      "category": "Tropical Storm"
+    },
+    {
+      "cycle": "2026-09-04 18:00",
+      "lat": 24.0,
+      "lon": 137.1,
+      "pressure_hpa": 996.0,
+      "wind_kt": 29.0,
+      "wind_kmh": 54,
+      "category": "Tropical Depression"
+    },
+    {
+      "cycle": "2026-09-05 00:00",
+      "lat": 26.3,
+      "lon": 136.3,
+      "pressure_hpa": 999.0,
+      "wind_kt": 25.0,
+      "wind_kmh": 46,
+      "category": "Tropical Depression"
+    },
+    {
+      "cycle": "2026-09-05 06:00",
+      "lat": 27.6,
+      "lon": 135.2,
+      "pressure_hpa": 998.0,
+      "wind_kt": 25.0,
+      "wind_kmh": 46,
+      "category": "Tropical Depression"
+    },
+    {
+      "cycle": "2026-09-05 12:00",
+      "lat": 28.5,
+      "lon": 133.8,
+      "pressure_hpa": 998.0,
+      "wind_kt": 25.0,
+      "wind_kmh": 46,
+      "category": "Tropical Depression"
+    }
+  ]
+}

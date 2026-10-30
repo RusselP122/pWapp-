@@ -1,0 +1,48 @@
+# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# dependencies
+/node_modules
+/.pnp
+.pnp.js
+
+# testing
+/coverage
+
+# production
+/build
+/dist
+
+# misc
+.DS_Store
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Large NetCDF and CSV data files (never commit these - too large for GitHub)
+*.nc
+*.nc.gz
+*.nc.gz.base64
+*.csv
+
+# GCP Service Account keys & temp folders
+gcp-key.json
+/weathernext_frames/
+forecasttrack.py
+national_impact_forecast.py
+scripts/process_ibtracs.py
+himawari_brightness_temp.py
+model_comparison_broadcast.py
+philippine_satellite_gif.py
+philippines_satellite_gif.py
+ptcc_luzon.py
+ptcc_satellite.py
+tropical_signal_warning.py
+zoom_earth_atcf_storm_map.py
+ai_precip_outlook.py
+ai_temp_outlook.py
+ai_thunderstorm_outlook.py

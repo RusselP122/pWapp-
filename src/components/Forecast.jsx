@@ -1,0 +1,1575 @@
+// src/components/Forecast.jsx
+import React, { useEffect, useState, useMemo, useRef } from "react";
+import {
+  Maximize2,
+  Layers,
+  Map,
+  Compass,
+  Info,
+  ChevronDown,
+  ChevronUp,
+  ChevronLeft,
+  ChevronRight,
+  Grid,
+  Minimize2,
+  ZoomIn,
+  ZoomOut,
+  RotateCcw,
+  Activity,
+  Calendar,
+  X,
+  Database,
+  Keyboard
+} from "lucide-react";
+
+// Helper to resolve asset URLs relative to the base path in both local development and deployed production (subfolder) environments
+const getAssetUrl = (path) => {
+  if (!path) return null;
+  const base = import.meta.env.BASE_URL || "/";
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  return `${base}${cleanPath}`;
+};
+
+// Build dynamic date strings for today and yesterday in YYYY-MM-DD format (both UTC and local time)
+const getForecastDates = () => {
+  const dates = new Set();
+  const now = new Date();
+
+  // Only include today (0) and yesterday (-1)
+  [0, -1].forEach((offset) => {
+    // Local date
+    const dLocal = new Date(now);
+    dLocal.setDate(now.getDate() + offset);
+    const yLocal = dLocal.getFullYear();
+    const mLocal = String(dLocal.getMonth() + 1).padStart(2, "0");
+    const dayLocal = String(dLocal.getDate()).padStart(2, "0");
+    dates.add(`${yLocal}-${mLocal}-${dayLocal}`);
+
+    // UTC date
+    const dUtc = new Date(now.getTime() + offset * 86400000);
+    const yUtc = dUtc.getUTCFullYear();
+    const mUtc = String(dUtc.getUTCMonth() + 1).padStart(2, "0");
+    const dayUtc = String(dUtc.getUTCDate()).padStart(2, "0");
+    dates.add(`${yUtc}-${mUtc}-${dayUtc}`);
+  });
+
+  return Array.from(dates).sort((a, b) => b.localeCompare(a));
+};
+
+// Convert a model time string like "YYYY-MM-DDTHHMMSS" (UTC) to PHST
+const toPhstLabel = (modelTime) => {
+  const timePart = modelTime.split("T")[1] || "000000"; // HHMMSS
+  const utcHour = parseInt(timePart.slice(0, 2), 10);
+  const utcMinute = parseInt(timePart.slice(2, 4), 10);
+
+  const phHour24 = (utcHour + 8) % 24;
+  const period = phHour24 >= 12 ? "PM" : "AM";
+  let hour12 = phHour24 % 12;
+  if (hour12 === 0) hour12 = 12;
+
+  const minuteStr = String(utcMinute).padStart(2, "0");
+  return `${hour12}:${minuteStr} ${period}`;
+};
+
+const FORECAST_HOURS = ["000000", "060000", "120000", "180000"];
+const FORECAST_DATES = getForecastDates();
+
+const MODEL_INFO = {
+  fnv3_base: {
+    name: "GDM WNCP2",
+    desc: "Google DeepMind FuXi-Nazca V3 core meteorological forecasting model ensemble (WNCP2).",
+    type: "Machine Learning (ML)",
+    resolution: "High Resolution / Fast Convergence"
+  },
+  fnv3p1: {
+    name: "GDM WNCP1",
+    desc: "Earlier version of Google's AI cyclone model with an upgraded tracker. Operational Sept 2025 - May 2026.",
+    type: "Machine Learning (ML)",
+    resolution: "High Resolution"
+  },
+  wnv3: {
+    name: "GDM WNCv3",
+    desc: "Google DeepMind WeatherNext Cyclone V3 (WNCv3) high-resolution operational track forecasting ensemble.",
+    type: "Machine Learning (ML)",
+    resolution: "High Resolution / 64-Member Ensemble"
+  },
+  fnv3_large: {
+    name: "WNC Large Ensemble",
+    desc: "DeepMind Nazca Large-scale track ensemble providing enhanced dispersion paths.",
+    type: "AI Ensemble Deep-Learning",
+    resolution: "Medium Span / High Dispersion"
+  },
+  ifs: {
+    name: "ECMWF IFS",
+    desc: "European Centre for Medium-Range Weather Forecasts Integrated Forecasting System.",
+    type: "Physical Hydrodynamic Ensemble",
+    resolution: "Global Standard / High Detail"
+  },
+  aifs: {
+    name: "ECMWF AIFS",
+    desc: "ECMWF's newly integrated Artificial Intelligence hybrid track forecasting engine.",
+    type: "AI-Physics Hybrid Model",
+    resolution: "Enhanced Track Accuracy"
+  },
+  aigefs: {
+    name: "AI-GEFS",
+    desc: "NOAA's Global Ensemble Forecast System tracks parsed and plotted through machine learning.",
+    type: "Machine Learning Ensemble",
+    resolution: "Global Coverage / Outdated Warning Safety Check"
+  }
+};
+
+const FORECAST_OPTIONS = FORECAST_DATES.flatMap((dateStr) =>
+  FORECAST_HOURS.flatMap((hhmmss) => {
+    const modelTime = `${dateStr}T${hhmmss}`;
+    const hourUtc = hhmmss.slice(0, 2);
+    const isMidnight = hhmmss === "000000";
+
+    const fnv3Base5Day = isMidnight ? `/assets/tropical_cyclone_5day_forecast_FNV3P2_${dateStr}.png` : `/assets/tropical_cyclone_5day_forecast_FNV3P2_${modelTime}.png`;
+    const fnv3Base5DayAlt = isMidnight ? `/assets/tropical_cyclone_5day_forecast_FNV3P2_${modelTime}.png` : null;
+
+    const fnv3Base15Day = isMidnight ? `/assets/tropical_cyclone_15day_forecast_FNV3P2_${dateStr}.png` : `/assets/tropical_cyclone_15day_forecast_FNV3P2_${modelTime}.png`;
+    const fnv3Base15DayAlt = isMidnight ? `/assets/tropical_cyclone_15day_forecast_FNV3P2_${modelTime}.png` : null;
+
+    const fnv3p15Day = isMidnight ? `/assets/tropical_cyclone_5day_forecast_FNV3P1_${dateStr}.png` : `/assets/tropical_cyclone_5day_forecast_FNV3P1_${modelTime}.png`;
+    const fnv3p15DayAlt = isMidnight ? `/assets/tropical_cyclone_5day_forecast_FNV3P1_${modelTime}.png` : null;
+
+    const fnv3p115Day = isMidnight ? `/assets/tropical_cyclone_15day_forecast_FNV3P1_${dateStr}.png` : `/assets/tropical_cyclone_15day_forecast_FNV3P1_${modelTime}.png`;
+    const fnv3p115DayAlt = isMidnight ? `/assets/tropical_cyclone_15day_forecast_FNV3P1_${modelTime}.png` : null;
+
+    const wnv35Day = isMidnight ? `/assets/tropical_cyclone_5day_forecast_WNV3_${dateStr}.png` : `/assets/tropical_cyclone_5day_forecast_WNV3_${modelTime}.png`;
+    const wnv35DayAlt = isMidnight ? `/assets/tropical_cyclone_5day_forecast_WNV3_${modelTime}.png` : null;
+
+    const wnv315Day = isMidnight ? `/assets/tropical_cyclone_15day_forecast_WNV3_${dateStr}.png` : `/assets/tropical_cyclone_15day_forecast_WNV3_${modelTime}.png`;
+    const wnv315DayAlt = isMidnight ? `/assets/tropical_cyclone_15day_forecast_WNV3_${modelTime}.png` : null;
+
+    const fnv3Large5Day = isMidnight ? `/assets/fnv3_tropical_cyclone_5day_forecast_${dateStr}.png` : `/assets/fnv3_tropical_cyclone_5day_forecast_${modelTime}.png`;
+    const fnv3Large5DayAlt = isMidnight ? `/assets/fnv3_tropical_cyclone_5day_forecast_${modelTime}.png` : null;
+
+    const fnv3Large15Day = isMidnight ? `/assets/fnv3_tropical_cyclone_15day_forecast_${dateStr}.png` : `/assets/fnv3_tropical_cyclone_15day_forecast_${modelTime}.png`;
+    const fnv3Large15DayAlt = isMidnight ? `/assets/fnv3_tropical_cyclone_15day_forecast_${modelTime}.png` : null;
+
+    const ifs5Day = `/assets/ifs_tropical_cyclone_5day_forecast_${modelTime}.png`;
+    const ifs5DayAlt = isMidnight ? `/assets/ifs_tropical_cyclone_5day_forecast_${dateStr}.png` : null;
+
+    const ifs15Day = `/assets/ifs_tropical_cyclone_15day_forecast_${modelTime}.png`;
+    const ifs15DayAlt = isMidnight ? `/assets/ifs_tropical_cyclone_15day_forecast_${dateStr}.png` : null;
+
+    const aifs5Day = `/assets/aifs_tropical_cyclone_5day_forecast_${modelTime}.png`;
+    const aifs5DayAlt = isMidnight ? `/assets/aifs_tropical_cyclone_5day_forecast_${dateStr}.png` : null;
+
+    const aifs15Day = `/assets/aifs_tropical_cyclone_15day_forecast_${modelTime}.png`;
+    const aifs15DayAlt = isMidnight ? `/assets/aifs_tropical_cyclone_15day_forecast_${dateStr}.png` : null;
+
+    const aigefs5Day = `/assets/aigefs_tropical_cyclone_5day_forecast_${modelTime}.png`;
+    const aigefs5DayAlt = isMidnight ? `/assets/aigefs_tropical_cyclone_5day_forecast_${dateStr}.png` : null;
+
+    const aigefs15Day = `/assets/aigefs_tropical_cyclone_15day_forecast_${modelTime}.png`;
+    const aigefs15DayAlt = isMidnight ? `/assets/aigefs_tropical_cyclone_15day_forecast_${dateStr}.png` : null;
+
+    return [
+      { id: `fnv3-base-5day-${modelTime}`, type: "5day", model: "fnv3_base", label: `5-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(fnv3Base5Day), altSrc: getAssetUrl(fnv3Base5DayAlt) },
+      { id: `fnv3-base-15day-${modelTime}`, type: "15day", model: "fnv3_base", label: `15-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(fnv3Base15Day), altSrc: getAssetUrl(fnv3Base15DayAlt) },
+      { id: `fnv3p1-5day-${modelTime}`, type: "5day", model: "fnv3p1", label: `5-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(fnv3p15Day), altSrc: getAssetUrl(fnv3p15DayAlt) },
+      { id: `fnv3p1-15day-${modelTime}`, type: "15day", model: "fnv3p1", label: `15-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(fnv3p115Day), altSrc: getAssetUrl(fnv3p115DayAlt) },
+      { id: `wnv3-5day-${modelTime}`, type: "5day", model: "wnv3", label: `5-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(wnv35Day), altSrc: getAssetUrl(wnv35DayAlt) },
+      { id: `wnv3-15day-${modelTime}`, type: "15day", model: "wnv3", label: `15-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(wnv315Day), altSrc: getAssetUrl(wnv315DayAlt) },
+      { id: `fnv3-large-5day-${modelTime}`, type: "5day", model: "fnv3_large", label: `5-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(fnv3Large5Day), altSrc: getAssetUrl(fnv3Large5DayAlt) },
+      { id: `fnv3-large-15day-${modelTime}`, type: "15day", model: "fnv3_large", label: `15-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(fnv3Large15Day), altSrc: getAssetUrl(fnv3Large15DayAlt) },
+      { id: `ifs-5day-${modelTime}`, type: "5day", model: "ifs", label: `5-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(ifs5Day), altSrc: getAssetUrl(ifs5DayAlt) },
+      { id: `ifs-15day-${modelTime}`, type: "15day", model: "ifs", label: `15-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(ifs15Day), altSrc: getAssetUrl(ifs15DayAlt) },
+      { id: `aifs-5day-${modelTime}`, type: "5day", model: "aifs", label: `5-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(aifs5Day), altSrc: getAssetUrl(aifs5DayAlt) },
+      { id: `aifs-15day-${modelTime}`, type: "15day", model: "aifs", label: `15-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(aifs15Day), altSrc: getAssetUrl(aifs15DayAlt) },
+      { id: `aigefs-5day-${modelTime}`, type: "5day", model: "aigefs", label: `5-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(aigefs5Day), altSrc: getAssetUrl(aigefs5DayAlt) },
+      { id: `aigefs-15day-${modelTime}`, type: "15day", model: "aigefs", label: `15-day forecast (${dateStr} ${hourUtc}:00 UTC)`, modelTime, imageSrc: getAssetUrl(aigefs15Day), altSrc: getAssetUrl(aigefs15DayAlt) },
+    ];
+  })
+);
+
+const Forecast = () => {
+  const [availableIds, setAvailableIds] = useState([]);
+  const [resolvedSrcs, setResolvedSrcs] = useState({});
+  const cycleScrollRef = useRef(null);
+  const [canScrollCycleLeft, setCanScrollCycleLeft] = useState(false);
+  const [canScrollCycleRight, setCanScrollCycleRight] = useState(false);
+  const [selectedModel, setSelectedModel] = useState("fnv3_base");
+  const [selectedTimeId, setSelectedTimeId] = useState(null);
+  const [enlargedImage, setEnlargedImage] = useState(null);
+  const [enlargedModelKey, setEnlargedModelKey] = useState(null);
+  const [showClusters, setShowClusters] = useState(false);
+  const [showForecastTrack, setShowForecastTrack] = useState(false);
+  const [stormsIndex, setStormsIndex] = useState([]);
+  const [selectedStormId, setSelectedStormId] = useState("latest");
+
+  useEffect(() => {
+    fetch(getAssetUrl(`/data/tc_storms_index.json?t=${Date.now()}`))
+      .then((res) => {
+        if (res.ok) return res.json();
+        throw new Error("Failed to load storms index");
+      })
+      .then((json) => {
+        setStormsIndex((json || []).filter((s) => s.active));
+      })
+      .catch((err) => {
+        console.error("Error loading storms index in Forecast:", err);
+      });
+  }, []);
+
+  // Interactive UI improvements states
+  const [compareMode, setCompareMode] = useState(false);
+  const [activeModelTab, setActiveModelTab] = useState("characteristics");
+  const [zoomScale, setZoomScale] = useState(1);
+  const [panOffset, setPanOffset] = useState({ x: 0, y: 0 });
+  const [isDragging, setIsDragging] = useState(false);
+  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
+
+  // Touch swipe state for modal slider
+  const [swipeStart, setSwipeStart] = useState(null);
+  const [swipeEnd, setSwipeEnd] = useState(null);
+
+  const handleOpenEnlarged = (modelKey = null, directUrl = null) => {
+    resetZoom();
+    if (showForecastTrack) {
+      setEnlargedImage(directUrl || getAssetUrl(`/assets/tc_forecast_${selectedStormId}.png`));
+      setEnlargedModelKey(null);
+    } else {
+      const resolvedModel = modelKey || (directUrl ? null : selectedModel);
+      if (resolvedModel && MODEL_INFO[resolvedModel]) {
+        setEnlargedModelKey(resolvedModel);
+        setEnlargedImage(null);
+      } else {
+        setEnlargedImage(directUrl);
+        setEnlargedModelKey(null);
+      }
+    }
+  };
+
+  const handleCloseEnlarged = () => {
+    setEnlargedModelKey(null);
+    setEnlargedImage(null);
+    resetZoom();
+  };
+
+  useEffect(() => {
+    setShowForecastTrack(false);
+    if (selectedModel !== "fnv3_large") {
+      setShowClusters(false);
+    }
+    setSelectedStormId("latest");
+  }, [selectedModel]);
+
+  useEffect(() => {
+    if (compareMode) {
+      setShowForecastTrack(false);
+    }
+  }, [compareMode]);
+
+  // Probe available images in local assets with alternate format fallback
+  useEffect(() => {
+    const probeAvailableImages = () => {
+      FORECAST_OPTIONS.forEach((opt) => {
+        const img = new Image();
+        let triedAlt = false;
+
+        img.onload = () => {
+          setResolvedSrcs((prev) => ({ ...prev, [opt.id]: img.src }));
+          setAvailableIds((prev) =>
+            prev.includes(opt.id) ? prev : [...prev, opt.id]
+          );
+        };
+
+        img.onerror = () => {
+          if (!triedAlt && opt.altSrc && opt.altSrc !== opt.imageSrc) {
+            triedAlt = true;
+            img.src = opt.altSrc;
+            return;
+          }
+          setAvailableIds((prev) => prev.filter((id) => id !== opt.id));
+        };
+
+        img.src = opt.imageSrc;
+      });
+    };
+
+    probeAvailableImages();
+
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        probeAvailableImages();
+      }
+    };
+
+    window.addEventListener("focus", probeAvailableImages);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      window.removeEventListener("focus", probeAvailableImages);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
+  }, []);
+
+  const allAvailableOptions = useMemo(() => {
+    return FORECAST_OPTIONS.filter((opt) => availableIds.includes(opt.id));
+  }, [availableIds]);
+
+  const latestConfigurations = useMemo(() => {
+    // In single-model mode, only show run cycles where the selected model has images
+    const filteredOptions = compareMode
+      ? allAvailableOptions
+      : allAvailableOptions.filter((opt) => opt.model === selectedModel);
+    return Array.from(
+      new Set(filteredOptions.map((opt) => `${opt.type}-${opt.modelTime}`))
+    ).sort((a, b) => {
+      const timeA = a.substring(a.indexOf('-') + 1);
+      const timeB = b.substring(b.indexOf('-') + 1);
+      if (timeA !== timeB) return timeA < timeB ? 1 : -1;
+      return a.startsWith("15day") ? -1 : 1;
+    });
+  }, [allAvailableOptions, selectedModel, compareMode]);
+
+  const timelineConfigs = useMemo(() => {
+    return latestConfigurations.map((configId) => {
+      const parts = configId.split('-');
+      const type = parts[0];
+      const modelTime = parts.slice(1).join('-');
+      // Find any option that matches this config to get a nice formatted label / cycleText
+      const opt = allAvailableOptions.find(o => o.type === type && o.modelTime === modelTime);
+      return {
+        configId,
+        type,
+        modelTime,
+        label: opt ? opt.label : `${type} forecast (${modelTime})`,
+      };
+    });
+  }, [latestConfigurations, allAvailableOptions]);
+
+  const checkCycleScroll = () => {
+    if (cycleScrollRef.current) {
+      const { scrollLeft, scrollWidth, clientWidth } = cycleScrollRef.current;
+      setCanScrollCycleLeft(scrollLeft > 6);
+      setCanScrollCycleRight(scrollLeft + clientWidth < scrollWidth - 6);
+    }
+  };
+
+  useEffect(() => {
+    checkCycleScroll();
+    const el = cycleScrollRef.current;
+    if (!el) return;
+    el.addEventListener("scroll", checkCycleScroll, { passive: true });
+    window.addEventListener("resize", checkCycleScroll);
+    return () => {
+      el.removeEventListener("scroll", checkCycleScroll);
+      window.removeEventListener("resize", checkCycleScroll);
+    };
+  }, [timelineConfigs]);
+
+  // Keep latest card (15-Day Longrange) strictly visible at the beginning without left-edge clipping
+  useEffect(() => {
+    if (cycleScrollRef.current) {
+      cycleScrollRef.current.scrollLeft = 0;
+      setTimeout(checkCycleScroll, 60);
+    }
+  }, [selectedModel]);
+
+  const scrollCycles = (direction) => {
+    if (cycleScrollRef.current) {
+      const scrollAmount = direction === "left" ? -280 : 280;
+      cycleScrollRef.current.scrollBy({ left: scrollAmount, behavior: "smooth" });
+    }
+  };
+
+  const activeConfigId = useMemo(() => {
+    if (selectedTimeId && latestConfigurations.includes(selectedTimeId)) {
+      return selectedTimeId;
+    }
+    return latestConfigurations.length ? latestConfigurations[0] : null;
+  }, [selectedTimeId, latestConfigurations]);
+
+  const current = useMemo(() => {
+    if (!activeConfigId) return null;
+    const parts = activeConfigId.split('-');
+    const type = parts[0];
+    const modelTime = parts.slice(1).join('-');
+    const opt = FORECAST_OPTIONS.find(
+      (o) => o.model === selectedModel && o.type === type && o.modelTime === modelTime
+    );
+    const isAvailable = opt ? availableIds.includes(opt.id) : false;
+    const finalSrc = isAvailable ? (resolvedSrcs[opt.id] || opt.imageSrc) : null;
+    return {
+      id: opt ? opt.id : `fallback-${selectedModel}-${activeConfigId}`,
+      type,
+      modelTime,
+      model: selectedModel,
+      label: opt ? opt.label : `${type} forecast (${modelTime})`,
+      imageSrc: finalSrc,
+    };
+  }, [activeConfigId, selectedModel, availableIds, resolvedSrcs]);
+
+  let imageSrc = current ? current.imageSrc : null;
+  if (showForecastTrack) {
+    imageSrc = getAssetUrl(`/assets/tc_forecast_${selectedStormId}.png`);
+  } else if (selectedModel === "fnv3_large" && showClusters && imageSrc) {
+    imageSrc = imageSrc.replace(".png", "_cluster.png");
+  }
+
+
+
+  // Handle zooming & panning interactive lightbox
+  const handleWheel = (e) => {
+    e.preventDefault();
+    const scaleFactor = 0.15;
+    const nextScale = e.deltaY < 0 ? zoomScale + scaleFactor : zoomScale - scaleFactor;
+    setZoomScale(Math.min(4, Math.max(1, nextScale)));
+  };
+
+  const handleMouseDown = (e) => {
+    if (zoomScale <= 1) return;
+    setIsDragging(true);
+    setDragStart({ x: e.clientX - panOffset.x, y: e.clientY - panOffset.y });
+  };
+
+  const handleMouseMove = (e) => {
+    if (!isDragging) return;
+    setPanOffset({
+      x: e.clientX - dragStart.x,
+      y: e.clientY - dragStart.y
+    });
+  };
+
+  const handleMouseUp = () => {
+    setIsDragging(false);
+  };
+
+  const resetZoom = () => {
+    setZoomScale(1);
+    setPanOffset({ x: 0, y: 0 });
+  };
+
+  const modelKeys = useMemo(() => Object.keys(MODEL_INFO), []);
+
+  const handlePrevModel = (e) => {
+    e?.stopPropagation?.();
+    const currentKey = enlargedModelKey || selectedModel;
+    const currentIdx = modelKeys.indexOf(currentKey);
+    const prevIdx = (currentIdx - 1 + modelKeys.length) % modelKeys.length;
+    const newKey = modelKeys[prevIdx];
+    resetZoom();
+    if (enlargedModelKey) {
+      setEnlargedModelKey(newKey);
+    }
+    setSelectedModel(newKey);
+  };
+
+  const handleNextModel = (e) => {
+    e?.stopPropagation?.();
+    const currentKey = enlargedModelKey || selectedModel;
+    const currentIdx = modelKeys.indexOf(currentKey);
+    const nextIdx = (currentIdx + 1) % modelKeys.length;
+    const newKey = modelKeys[nextIdx];
+    resetZoom();
+    if (enlargedModelKey) {
+      setEnlargedModelKey(newKey);
+    }
+    setSelectedModel(newKey);
+  };
+
+  const handlePrevCycle = (e) => {
+    e?.stopPropagation?.();
+    if (!timelineConfigs.length) return;
+    const currentIdx = timelineConfigs.findIndex((c) => c.configId === activeConfigId);
+    const prevIdx = (currentIdx - 1 + timelineConfigs.length) % timelineConfigs.length;
+    resetZoom();
+    setSelectedTimeId(timelineConfigs[prevIdx].configId);
+  };
+
+  const handleNextCycle = (e) => {
+    e?.stopPropagation?.();
+    if (!timelineConfigs.length) return;
+    const currentIdx = timelineConfigs.findIndex((c) => c.configId === activeConfigId);
+    const nextIdx = (currentIdx + 1) % timelineConfigs.length;
+    resetZoom();
+    setSelectedTimeId(timelineConfigs[nextIdx].configId);
+  };
+
+  const allStormOptions = useMemo(() => ["latest", ...stormsIndex.map((s) => s.track_id)], [stormsIndex]);
+
+  const handlePrevStorm = (e) => {
+    e?.stopPropagation?.();
+    if (allStormOptions.length <= 1) return;
+    const currentIdx = allStormOptions.indexOf(selectedStormId);
+    const prevIdx = (currentIdx - 1 + allStormOptions.length) % allStormOptions.length;
+    resetZoom();
+    setSelectedStormId(allStormOptions[prevIdx]);
+  };
+
+  const handleNextStorm = (e) => {
+    e?.stopPropagation?.();
+    if (allStormOptions.length <= 1) return;
+    const currentIdx = allStormOptions.indexOf(selectedStormId);
+    const nextIdx = (currentIdx + 1) % allStormOptions.length;
+    resetZoom();
+    setSelectedStormId(allStormOptions[nextIdx]);
+  };
+
+  // Global Keyboard Navigation (Arrow keys: Left/Right = Models/Storms, Up/Down = Run Cycles, Esc = Close Modal)
+  useEffect(() => {
+    const handleKeyDown = (e) => {
+      if (["INPUT", "TEXTAREA", "SELECT"].includes(e.target?.tagName)) return;
+
+      const isModalOpen = Boolean(enlargedModelKey || enlargedImage);
+
+      if (e.key === "Escape" && isModalOpen) {
+        e.preventDefault();
+        handleCloseEnlarged();
+        return;
+      }
+
+      if (showForecastTrack) {
+        if (e.key === "ArrowLeft") {
+          e.preventDefault();
+          handlePrevStorm();
+        } else if (e.key === "ArrowRight") {
+          e.preventDefault();
+          handleNextStorm();
+        }
+        return;
+      }
+
+      if (e.key === "ArrowLeft") {
+        e.preventDefault();
+        handlePrevModel();
+      } else if (e.key === "ArrowRight") {
+        e.preventDefault();
+        handleNextModel();
+      } else if (e.key === "ArrowUp") {
+        e.preventDefault();
+        handlePrevCycle();
+      } else if (e.key === "ArrowDown") {
+        e.preventDefault();
+        handleNextCycle();
+      }
+    };
+
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [
+    enlargedModelKey,
+    enlargedImage,
+    selectedModel,
+    activeConfigId,
+    timelineConfigs,
+    modelKeys,
+    showForecastTrack,
+    selectedStormId,
+    allStormOptions
+  ]);
+
+  return (
+    <section className="bg-slate-950 py-8 md:py-12 relative overflow-x-hidden selection:bg-cyan-500 selection:text-white">
+      <style>{`
+        .bg-grid-pattern {
+            background-image: linear-gradient(to right, rgba(255,255,255,0.015) 1px, transparent 1px),
+                              linear-gradient(to bottom, rgba(255,255,255,0.015) 1px, transparent 1px);
+            background-size: 32px 32px;
+        }
+        .custom-glass {
+            background: rgba(15, 23, 42, 0.65);
+            backdrop-filter: blur(16px);
+            border: 1px solid rgba(255, 255, 255, 0.07);
+        }
+        .custom-scroll {
+          -webkit-overflow-scrolling: touch;
+        }
+        .custom-scroll::-webkit-scrollbar {
+          height: 4px;
+        }
+        .custom-scroll::-webkit-scrollbar-track {
+          background: rgba(255,255,255,0.02);
+          border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb {
+          background: rgba(34,211,238,0.25);
+          border-radius: 8px;
+        }
+        .custom-scroll::-webkit-scrollbar-thumb:hover {
+          background: rgba(34,211,238,0.5);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+      `}</style>
+
+      {/* Grid texture overlay for premium aesthetic */}
+      <div className="absolute inset-0 bg-grid-pattern pointer-events-none z-0"></div>
+
+      <div className="max-w-6xl mx-auto px-3 sm:px-4 md:px-6 relative z-10 flex flex-col gap-5 sm:gap-6 md:gap-8">
+
+        {/* Header Block */}
+        <header className="custom-glass rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-7 shadow-2xl flex flex-col xl:flex-row justify-between items-start xl:items-center gap-4 sm:gap-6 border-b border-white/5 relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-80 h-80 bg-gradient-to-br from-cyan-500/10 to-indigo-500/10 rounded-full blur-3xl pointer-events-none"></div>
+
+          <div>
+            <div className="flex items-center gap-2 mb-2">
+              <span className="w-2.5 h-2.5 rounded-full bg-cyan-400 animate-pulse shadow-[0_0_8px_rgba(34,211,238,0.7)]"></span>
+              <span className="text-xs font-black uppercase tracking-widest text-slate-400">Meteorological Guidance</span>
+            </div>
+            <h1 className="text-xl sm:text-2xl md:text-3xl font-black text-white tracking-tight bg-gradient-to-r from-white via-slate-100 to-slate-300 bg-clip-text text-transparent">
+              Forecast Models
+            </h1>
+            <p className="text-xs md:text-sm text-slate-400 max-w-xl mt-1 leading-relaxed">
+              Explore advanced machine learning track models side-by-side. All tracks are generated dynamically from NOAA, ECMWF, and DeepMind.
+            </p>
+          </div>
+
+          <div className="grid grid-cols-1 sm:grid-cols-3 xl:flex xl:flex-wrap items-center gap-2 sm:gap-2.5 w-full xl:w-auto shrink-0 z-10">
+            {/* Interactive Spaghetti Map link */}
+            <a
+              href="/spaghetti"
+              className="px-3.5 py-2 sm:py-2.5 bg-slate-900/80 hover:bg-slate-800 border border-white/10 hover:border-slate-500 rounded-xl text-xs font-black tracking-wide text-slate-300 hover:text-white transition-all shadow-lg flex items-center justify-center gap-2 cursor-pointer"
+            >
+              <Map className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span>SPAGHETTI PLOT</span>
+            </a>
+
+
+
+            {/* Split Screen Multi Compare toggler */}
+            <button
+              onClick={() => setCompareMode(!compareMode)}
+              className={`px-3.5 py-2 sm:py-2.5 rounded-xl text-xs font-black tracking-wide transition-all border flex items-center justify-center gap-2 cursor-pointer shadow-lg ${compareMode
+                ? "bg-cyan-500/15 border-cyan-500/40 text-cyan-400"
+                : "bg-slate-900/80 border-white/10 text-slate-300 hover:text-white"
+                }`}
+            >
+              <Grid className="w-4 h-4 text-cyan-400 shrink-0" />
+              <span>{compareMode ? "SINGLE MODEL" : "COMPARISON GRID"}</span>
+            </button>
+          </div>
+        </header>
+
+        {/* Model Tabs Selection Timeline */}
+        {!compareMode && (
+          <div className="relative w-full">
+            <div className="flex overflow-x-auto w-full custom-scroll no-scrollbar pb-1.5 gap-1.5 sm:gap-2 shrink-0 z-20 overscroll-x-contain">
+              {modelKeys.map((modelKey) => {
+                const isSelected = selectedModel === modelKey;
+                return (
+                  <button
+                    key={modelKey}
+                    onClick={() => { setSelectedModel(modelKey); setSelectedTimeId(null); }}
+                    className={`px-3 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-black tracking-wider transition-all duration-200 border cursor-pointer whitespace-nowrap shrink-0 ${isSelected
+                      ? "bg-slate-800 text-cyan-400 border-cyan-500/40 shadow-lg shadow-cyan-950/40 scale-102"
+                      : "bg-slate-950/60 border-white/5 text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
+                      }`}
+                  >
+                    {MODEL_INFO[modelKey].name}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
+        {/* Timeline selecting slider nodes (replacing old dropdown) */}
+        {timelineConfigs.length > 0 ? (
+          <div className="flex flex-col gap-2 relative">
+            <div className="flex items-center justify-between pl-1 pr-1">
+              <span className="text-[10px] uppercase font-black tracking-widest text-slate-500 flex items-center gap-1.5">
+                <Calendar className="w-3.5 h-3.5 text-cyan-400" />
+                <span>Select Model Run Cycle</span>
+              </span>
+              {(canScrollCycleLeft || canScrollCycleRight) && (
+                <div className="flex items-center gap-1">
+                  <button
+                    onClick={() => scrollCycles("left")}
+                    disabled={!canScrollCycleLeft}
+                    aria-label="Previous cycles"
+                    className={`p-1.5 rounded-lg border transition-all cursor-pointer ${canScrollCycleLeft
+                      ? "bg-slate-900 border-white/10 text-cyan-400 hover:bg-slate-800 hover:border-cyan-500/40 shadow-sm"
+                      : "bg-slate-950/40 border-white/5 text-slate-600 opacity-30 cursor-not-allowed"
+                      }`}
+                  >
+                    <ChevronLeft className="w-3.5 h-3.5" />
+                  </button>
+                  <button
+                    onClick={() => scrollCycles("right")}
+                    disabled={!canScrollCycleRight}
+                    aria-label="Next cycles"
+                    className={`p-1.5 rounded-lg border transition-all cursor-pointer ${canScrollCycleRight
+                      ? "bg-slate-900 border-white/10 text-cyan-400 hover:bg-slate-800 hover:border-cyan-500/40 shadow-sm"
+                      : "bg-slate-950/40 border-white/5 text-slate-600 opacity-30 cursor-not-allowed"
+                      }`}
+                  >
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+
+            <div className="relative w-full group/cycle">
+              {/* Fade gradient indicator on left when scrolled */}
+              {canScrollCycleLeft && (
+                <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-slate-950 to-transparent pointer-events-none z-10 rounded-l-xl"></div>
+              )}
+              {/* Fade gradient indicator on right when more items available */}
+              {canScrollCycleRight && (
+                <div className="absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l from-slate-950 to-transparent pointer-events-none z-10 rounded-r-xl"></div>
+              )}
+
+              <div
+                ref={cycleScrollRef}
+                onWheel={(e) => {
+                  if (cycleScrollRef.current && Math.abs(e.deltaY) > Math.abs(e.deltaX)) {
+                    cycleScrollRef.current.scrollLeft += e.deltaY;
+                  }
+                }}
+                style={{ overflowAnchor: "none" }}
+                className="flex overflow-x-auto gap-2 sm:gap-2.5 custom-scroll px-1.5 py-1.5 w-full overscroll-x-contain snap-x scroll-px-1.5"
+              >
+                {timelineConfigs.map((opt) => {
+                  const isActive = (activeConfigId === opt.configId);
+                  const cycleText = opt.label.substring(opt.label.indexOf('(') + 1, opt.label.indexOf(')'));
+
+                  return (
+                    <button
+                      key={opt.configId}
+                      onClick={() => setSelectedTimeId(opt.configId)}
+                      className={`px-3 py-2 sm:px-3.5 sm:py-2.5 rounded-xl text-xs transition-all border flex flex-col items-start gap-1 cursor-pointer shrink-0 snap-start text-left ${isActive
+                        ? "bg-cyan-500/15 border-cyan-400/80 text-white shadow-lg shadow-cyan-950/60 ring-2 ring-cyan-400/30"
+                        : "bg-slate-950/50 border-white/5 text-slate-400 hover:text-slate-200 hover:bg-slate-900/60"
+                        }`}
+                    >
+                      <span className="font-black capitalize">{opt.type === "5day" ? "5-Day Outlook" : "15-Day Longrange"}</span>
+                      <span className="text-[10px] font-mono opacity-70 font-semibold">{cycleText}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {((selectedModel === "fnv3_base" || selectedModel === "fnv3_large") && !compareMode) && (
+              <div className="flex flex-wrap items-center gap-2 mt-1 sm:mt-2">
+                <span className="text-[10px] uppercase font-black tracking-widest text-slate-500 pl-1 shrink-0">
+                  View Mode:
+                </span>
+                <div className="flex flex-wrap rounded-xl bg-slate-950 p-1 border border-white/5 shadow-inner gap-1">
+                  <button
+                    onClick={() => { setShowClusters(false); setShowForecastTrack(false); }}
+                    className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wide transition-all cursor-pointer ${(!showClusters && !showForecastTrack) ? "bg-slate-800 text-cyan-400 shadow" : "text-slate-500 hover:text-slate-300"
+                      }`}
+                  >
+                    STANDARD OUTLOOK
+                  </button>
+                  {selectedModel === "fnv3_large" && (
+                    <button
+                      onClick={() => { setShowClusters(true); setShowForecastTrack(false); }}
+                      className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wide transition-all cursor-pointer ${showClusters ? "bg-slate-800 text-cyan-400 shadow" : "text-slate-500 hover:text-slate-300"
+                        }`}
+                    >
+                      TRACK CLUSTERS
+                    </button>
+                  )}
+                  <button
+                    onClick={() => { setShowClusters(false); setShowForecastTrack(true); }}
+                    className={`px-2.5 sm:px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wide transition-all cursor-pointer ${showForecastTrack ? "bg-slate-800 text-cyan-400 shadow" : "text-slate-500 hover:text-slate-300"
+                      }`}
+                  >
+                    FORECAST TRACK
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {showForecastTrack && stormsIndex.length > 0 && !compareMode && (
+              <div className="flex items-center gap-2 mt-2 flex-wrap">
+                <span className="text-[10px] uppercase font-black tracking-widest text-slate-500 pl-1">
+                  Storm Track:
+                </span>
+                <div className="flex flex-wrap rounded-xl bg-slate-950 p-1 border border-white/5 shadow-inner gap-0.5">
+                  <button
+                    onClick={() => setSelectedStormId("latest")}
+                    className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wide transition-all cursor-pointer ${selectedStormId === "latest" ? "bg-slate-800 text-cyan-400 shadow" : "text-slate-500 hover:text-slate-300"
+                      }`}
+                  >
+                    ALL SYSTEMS (COMPOSITE)
+                  </button>
+                  {stormsIndex.map((storm) => (
+                    <button
+                      key={storm.track_id}
+                      onClick={() => setSelectedStormId(storm.track_id)}
+                      className={`px-3 py-1.5 rounded-lg text-[10px] font-black tracking-wide transition-all cursor-pointer ${selectedStormId === storm.track_id ? "bg-slate-800 text-cyan-400 shadow" : "text-slate-500 hover:text-slate-300"
+                        }`}
+                    >
+                      {storm.storm_name.toUpperCase()} ({storm.track_id})
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        ) : (
+          <div className="p-5 rounded-2xl custom-glass text-center text-xs text-slate-500">
+            No track forecasts found in active directories for any model today.
+          </div>
+        )}
+
+        {/* Grid / Single Map layout switch */}
+        {compareMode ? (
+          /* Multi Model Comparison Grid Mode */
+          <div className="flex flex-col gap-5">
+            <div className="flex items-center justify-between border-b border-white/5 pb-2.5">
+              <h3 className="text-xs font-black uppercase text-slate-400 tracking-wider flex items-center gap-2">
+                <Grid className="w-4 h-4 text-cyan-400" />
+                <span>Comparing forecast tracks ({current ? `${current.type.toUpperCase()} / ${current.modelTime}` : "N/A"})</span>
+              </h3>
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Object.keys(MODEL_INFO).map((modelKey) => {
+                const info = MODEL_INFO[modelKey];
+                let image = null;
+                if (activeConfigId) {
+                  const parts = activeConfigId.split('-');
+                  const type = parts[0];
+                  const modelTime = parts.slice(1).join('-');
+                  const opt = FORECAST_OPTIONS.find(
+                    (o) => o.model === modelKey && o.type === type && o.modelTime === modelTime
+                  );
+                  const isAvailable = opt ? availableIds.includes(opt.id) : false;
+                  image = isAvailable ? (resolvedSrcs[opt.id] || opt.imageSrc) : null;
+                  if (modelKey === "fnv3_large" && showClusters && image) {
+                    image = image.replace(".png", "_cluster.png");
+                  }
+                }
+
+                return (
+                  <div key={modelKey} className="custom-glass rounded-3xl p-4 flex flex-col justify-between relative overflow-hidden group hover:border-cyan-500/30 transition-all shadow-xl">
+                    <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 blur-xl rounded-full pointer-events-none"></div>
+
+                    <div>
+                      <div className="flex items-center justify-between mb-3 border-b border-white/5 pb-2">
+                        <span className="text-xs font-black text-white">{info.name}</span>
+                        <span className="text-[9px] uppercase font-bold text-slate-500 bg-slate-950 px-2 py-0.5 rounded-lg border border-white/5">
+                          {info.type.split(" ")[0]}
+                        </span>
+                      </div>
+
+                      <div className="h-56 w-full bg-slate-950 border border-white/5 rounded-2xl overflow-hidden flex items-center justify-center relative group/img">
+                        {image ? (
+                          <>
+                            <img
+                              src={image}
+                              alt={`Grid compare track for ${info.name}`}
+                              className="w-full h-full object-contain cursor-pointer hover:opacity-90 transition-opacity"
+                              onClick={() => handleOpenEnlarged(modelKey)}
+                            />
+                            <button
+                              onClick={() => handleOpenEnlarged(modelKey)}
+                              className="absolute bottom-2.5 right-2.5 p-2 bg-slate-900/90 hover:bg-slate-800 border border-white/10 rounded-xl text-white opacity-0 group-hover/img:opacity-100 transition-opacity cursor-pointer shadow-lg"
+                            >
+                              <Maximize2 className="w-3.5 h-3.5" />
+                            </button>
+                          </>
+                        ) : (
+                          <div className="text-center p-4 flex flex-col items-center gap-2 cursor-pointer" onClick={() => handleOpenEnlarged(modelKey)}>
+                            <Database className="w-8 h-8 text-slate-700 animate-pulse" />
+                            <span className="text-[10px] text-slate-500 font-bold leading-tight">Image not available at this hour cycle.</span>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+
+                    <p className="text-[10px] text-slate-500 font-bold leading-relaxed mt-3">{info.desc}</p>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        ) : (
+          /* Single Interactive Track Visualizer */
+          <div className="grid grid-cols-1 lg:grid-cols-[2fr,1fr] gap-5 sm:gap-6 md:gap-8 items-start">
+
+            {/* Left Column Forecast Map */}
+            <div className="custom-glass rounded-2xl sm:rounded-3xl p-3 sm:p-4 shadow-2xl relative group flex flex-col">
+              <div className="border-b border-white/5 px-2.5 sm:px-4 py-2 sm:py-2.5 flex items-center justify-between text-xs text-slate-400">
+                <span className="font-bold flex items-center gap-1.5">
+                  <Activity className="w-3.5 h-3.5 text-cyan-400 animate-pulse" />
+                  <span>Forecast Track Map</span>
+                </span>
+                <div className="flex items-center gap-2">
+                  <span className="font-mono text-[10px] text-slate-400 font-bold bg-slate-950 px-2 py-0.5 rounded-lg border border-white/5">
+                    {current ? current.modelTime : "N/A"}
+                  </span>
+                </div>
+              </div>
+
+              {/* Standard Forecast Map */}
+              <div
+                tabIndex={0}
+                role="region"
+                aria-label="Forecast Track Map Visualizer - use arrow keys to navigate"
+                className="h-64 xs:h-72 sm:h-96 md:h-[28rem] lg:h-[30rem] flex items-center justify-center bg-slate-950 border border-white/5 rounded-xl sm:rounded-2xl overflow-hidden relative mt-2 shadow-inner group/map focus:outline-none focus:ring-1 focus:ring-cyan-500/50"
+                onKeyDown={(e) => {
+                  if (e.key === "ArrowLeft") { e.preventDefault(); handlePrevModel(); }
+                  else if (e.key === "ArrowRight") { e.preventDefault(); handleNextModel(); }
+                  else if (e.key === "ArrowUp") { e.preventDefault(); handlePrevCycle(); }
+                  else if (e.key === "ArrowDown") { e.preventDefault(); handleNextCycle(); }
+                  else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); handleOpenEnlarged(selectedModel, imageSrc); }
+                }}
+              >
+                {current && imageSrc ? (
+                  <>
+                    {/* Top Click hint badge (hidden on mobile/small screens) */}
+                    <div className="hidden sm:flex absolute top-2.5 left-2.5 z-20 items-center gap-1.5 px-2.5 py-1 bg-slate-950/80 backdrop-blur-md rounded-lg text-[10px] font-bold text-slate-300 border border-white/10 pointer-events-none shadow-lg">
+                      <Maximize2 className="w-3 h-3 text-cyan-400" />
+                      <span>Click to enlarge • ◀ ▶ arrows</span>
+                    </div>
+
+                    {/* Side navigation arrows on image (hidden on mobile/small screens) */}
+                    <button
+                      onClick={handlePrevModel}
+                      title="Previous Model (Left Arrow)"
+                      className="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-xl border border-white/10 shadow-xl transition-all active:scale-90 cursor-pointer backdrop-blur-sm opacity-0 group-hover/map:opacity-100"
+                    >
+                      <ChevronLeft className="w-4 sm:w-5 h-4 sm:h-5" />
+                    </button>
+
+                    <button
+                      onClick={handleNextModel}
+                      title="Next Model (Right Arrow)"
+                      className="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 z-20 p-2 sm:p-2.5 bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-xl border border-white/10 shadow-xl transition-all active:scale-90 cursor-pointer backdrop-blur-sm opacity-0 group-hover/map:opacity-100"
+                    >
+                      <ChevronRight className="w-4 sm:w-5 h-4 sm:h-5" />
+                    </button>
+
+                    <img
+                      src={imageSrc}
+                      alt={`Forecast track for ${current.label}`}
+                      className="h-full w-full object-contain cursor-pointer transition-transform duration-200 hover:scale-[1.01]"
+                      onClick={() => handleOpenEnlarged(selectedModel, imageSrc)}
+                    />
+
+                    <button
+                      onClick={() => handleOpenEnlarged(selectedModel, imageSrc)}
+                      className="hidden sm:flex absolute bottom-3 right-3 z-20 px-3 py-2 bg-slate-900/90 hover:bg-cyan-500 hover:text-slate-950 border border-white/10 rounded-xl text-white opacity-0 group-hover/map:opacity-100 transition-all cursor-pointer shadow-xl items-center gap-1.5 text-xs font-bold"
+                    >
+                      <Maximize2 className="w-3.5 h-3.5" />
+                      <span>Maximize</span>
+                    </button>
+                  </>
+                ) : (
+                  <div className="text-center p-8 flex flex-col items-center gap-3">
+                    <Database className="w-10 h-10 text-slate-700 animate-pulse" />
+                    <span className="text-xs md:text-sm text-slate-500 font-bold">No forecast image available as of the moment.</span>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Right Column Metadata Details */}
+            <div className="flex flex-col gap-6">
+
+              {/* Active Model run details */}
+              <aside className="custom-glass rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-2xl space-y-4 text-xs md:text-sm text-slate-300 relative overflow-hidden">
+                <div className="absolute top-0 right-0 w-24 h-24 bg-cyan-500/5 blur-2xl rounded-full"></div>
+
+                {/* Standard Run Details */}
+                <div>
+                  <h2 className="text-xs font-black text-slate-500 uppercase tracking-widest mb-3.5 flex items-center gap-1.5">
+                    <Layers className="w-4 h-4 text-cyan-400" />
+                    <span>Run Details</span>
+                  </h2>
+                  <dl className="space-y-3">
+                    <div className="flex justify-between items-center gap-4 border-b border-white/5 pb-2">
+                      <dt className="text-slate-500 font-bold">Model Time</dt>
+                      <dd className="font-mono text-right text-slate-200 font-bold">
+                        {current
+                          ? `${current.modelTime.replace("T", " ")}`
+                          : "N/A"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between items-center gap-4 border-b border-white/5 pb-2">
+                      <dt className="text-slate-500 font-bold">Local Time</dt>
+                      <dd className="text-right text-cyan-400 font-bold">
+                        {current
+                          ? `${toPhstLabel(current.modelTime)} PHST`
+                          : "N/A"}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between items-center gap-4 border-b border-white/5 pb-2">
+                      <dt className="text-slate-500 font-bold">Model Engine</dt>
+                      <dd className="text-right text-slate-200 font-bold">
+                        {MODEL_INFO[selectedModel]?.name}
+                      </dd>
+                    </div>
+                    <div className="flex justify-between items-center gap-4">
+                      <dt className="text-slate-500 font-bold">Visualized By</dt>
+                      <dd className="text-right text-slate-200 font-bold">Philippine Typhoon/Weather</dd>
+                    </div>
+                  </dl>
+                </div>
+
+                <div className="border-t border-white/5 pt-4 space-y-2.5 text-xs text-slate-500 leading-relaxed font-medium">
+                  <div className="flex items-start gap-2.5">
+                    <Info className="w-4 h-4 text-orange-400 shrink-0 mt-0.5" />
+                    <p className="text-slate-400">
+                      These forecast maps are compiled directly from satellite runs. Always verify coordinates with official alerts from PAGASA and local hazard offices.
+                    </p>
+                  </div>
+                </div>
+              </aside>
+
+              {/* Model Intelligence matrix (Accordions) */}
+              <div className="custom-glass rounded-2xl sm:rounded-3xl p-4 sm:p-5 md:p-6 shadow-2xl flex flex-col gap-4">
+                <div className="flex rounded-xl bg-slate-950 p-1 border border-white/5 shrink-0">
+                  <button
+                    onClick={() => setActiveModelTab("characteristics")}
+                    className={`flex-1 py-2 text-center rounded-lg text-xs font-black tracking-wide transition-all cursor-pointer ${activeModelTab === "characteristics" ? "bg-slate-800 text-cyan-400 shadow" : "text-slate-500"
+                      }`}
+                  >
+                    Details
+                  </button>
+                  <button
+                    onClick={() => setActiveModelTab("precision")}
+                    className={`flex-1 py-2 text-center rounded-lg text-xs font-black tracking-wide transition-all cursor-pointer ${activeModelTab === "precision" ? "bg-slate-800 text-cyan-400 shadow" : "text-slate-500"
+                      }`}
+                  >
+                    Specs
+                  </button>
+                </div>
+
+                {activeModelTab === "characteristics" ? (
+                  <div className="text-xs text-slate-400 leading-relaxed space-y-2.5">
+                    <h5 className="text-white font-black">{MODEL_INFO[selectedModel]?.name}</h5>
+                    <p className="font-medium">{MODEL_INFO[selectedModel]?.desc}</p>
+                  </div>
+                ) : (
+                  <div className="text-xs text-slate-400 leading-relaxed space-y-3">
+                    <div className="flex justify-between border-b border-white/5 pb-1.5">
+                      <span className="text-slate-500 font-bold">Category</span>
+                      <span className="text-white font-black">{MODEL_INFO[selectedModel]?.type}</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-slate-500 font-bold">Resolution</span>
+                      <span className="text-white font-black">{MODEL_INFO[selectedModel]?.resolution}</span>
+                    </div>
+                  </div>
+                )}
+              </div>
+
+            </div>
+          </div>
+        )}
+
+      </div>
+
+      {/* Full Screen Interactive Image Modal (with Model Slider & Keyboard Navigation) */}
+      {(enlargedModelKey || enlargedImage) && (() => {
+        // Mode 1: Storm Forecast Track Modal View
+        if (showForecastTrack) {
+          const activeStorm = stormsIndex.find((s) => s.track_id === selectedStormId);
+          const stormLabel = selectedStormId === "latest" ? "All Systems Composite" : (activeStorm ? `${activeStorm.storm_name.toUpperCase()} (${activeStorm.track_id})` : selectedStormId);
+          const displayImg = getAssetUrl(`/assets/tc_forecast_${selectedStormId}.png`);
+          const hasMultipleStorms = allStormOptions.length > 1;
+
+          return (
+            <div
+              className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-black/95 p-2 sm:p-4 md:p-6 backdrop-blur-md overflow-hidden select-none"
+              onClick={handleCloseEnlarged}
+            >
+              {/* Modal Header Toolbar */}
+              <div
+                className="w-full z-50 flex flex-col gap-2 pointer-events-none"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {/* Row 1: Active Badge, Center Keyboard Guide, Right Controls */}
+                <div className="flex items-center justify-between gap-2 w-full pointer-events-auto">
+                  <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 bg-slate-900/90 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/10 shadow-xl">
+                      <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse"></span>
+                      <span className="text-xs font-black text-white">FORECAST TRACK</span>
+                      <span className="text-[9px] uppercase font-bold text-cyan-400 bg-cyan-950/60 px-1.5 py-0.5 rounded border border-cyan-500/20">
+                        {stormLabel}
+                      </span>
+                    </div>
+                  </div>
+
+                  {/* Keyboard Shortcut Hints (Desktop) */}
+                  <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-900/90 backdrop-blur-md rounded-xl border border-white/10 text-[10px] font-mono text-slate-300 shadow-xl">
+                    <Keyboard className="w-3.5 h-3.5 text-cyan-400" />
+                    <span><strong className="text-cyan-300">◀ ▶</strong> Storm</span>
+                    <span className="text-slate-600">•</span>
+                    <span><strong className="text-cyan-300">ESC</strong> Close</span>
+                  </div>
+
+                  {/* Right Controls (Zoom & Close) */}
+                  <div className="flex items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl shrink-0">
+                    <div className="text-[10px] font-black text-slate-300 px-2 hidden sm:block">
+                      {zoomScale.toFixed(1)}x
+                    </div>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setZoomScale(Math.min(4, zoomScale + 0.5)); }}
+                      className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-slate-800 text-white transition cursor-pointer"
+                      title="Zoom In (+)"
+                    >
+                      <ZoomIn className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); setZoomScale(Math.max(1, zoomScale - 0.5)); }}
+                      className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-slate-800 text-white transition cursor-pointer"
+                      title="Zoom Out (-)"
+                    >
+                      <ZoomOut className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={(e) => { e.stopPropagation(); resetZoom(); }}
+                      className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-slate-800 text-white transition cursor-pointer"
+                      title="Reset Zoom (R)"
+                    >
+                      <RotateCcw className="w-4 h-4" />
+                    </button>
+                    <button
+                      onClick={handleCloseEnlarged}
+                      className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-red-500/20 text-red-400 hover:text-red-300 transition cursor-pointer ml-1"
+                      title="Close (ESC)"
+                    >
+                      <X className="w-4 h-4" />
+                    </button>
+                  </div>
+                </div>
+
+                {/* Row 2: Storm System Selector Pills */}
+                {stormsIndex.length > 0 && (
+                  <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1 px-1.5 bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/10 pointer-events-auto shadow-lg max-w-full">
+                    <button
+                      onClick={(e) => { e.stopPropagation(); resetZoom(); setSelectedStormId("latest"); }}
+                      className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                        selectedStormId === "latest"
+                          ? "bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                          : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                      }`}
+                    >
+                      ALL SYSTEMS (COMPOSITE)
+                    </button>
+                    {stormsIndex.map((storm) => {
+                      const isAct = selectedStormId === storm.track_id;
+                      return (
+                        <button
+                          key={storm.track_id}
+                          onClick={(e) => { e.stopPropagation(); resetZoom(); setSelectedStormId(storm.track_id); }}
+                          className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                            isAct
+                              ? "bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                              : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                          }`}
+                        >
+                          {storm.storm_name.toUpperCase()} ({storm.track_id})
+                        </button>
+                      );
+                    })}
+                  </div>
+                )}
+              </div>
+
+              {/* Left Chevron */}
+              {hasMultipleStorms && (
+                <button
+                  onClick={handlePrevStorm}
+                  title="Previous Storm (Left Arrow)"
+                  className="hidden sm:flex absolute left-5 top-1/2 -translate-y-1/2 z-50 p-3.5 bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer items-center justify-center backdrop-blur-sm"
+                >
+                  <ChevronLeft className="w-6 h-6" />
+                </button>
+              )}
+
+              {/* Right Chevron */}
+              {hasMultipleStorms && (
+                <button
+                  onClick={handleNextStorm}
+                  title="Next Storm (Right Arrow)"
+                  className="hidden sm:flex absolute right-5 top-1/2 -translate-y-1/2 z-50 p-3.5 bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer items-center justify-center backdrop-blur-sm"
+                >
+                  <ChevronRight className="w-6 h-6" />
+                </button>
+              )}
+
+              {/* Center Image */}
+              <div
+                className="w-full h-full flex items-center justify-center relative overflow-hidden py-2"
+                onWheel={handleWheel}
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUp}
+                onMouseLeave={handleMouseUp}
+                onTouchStart={(e) => {
+                  if (e.touches.length < 1) return;
+                  setSwipeStart(e.touches[0].clientX);
+                  if (zoomScale > 1) {
+                    setIsDragging(true);
+                    setDragStart({ x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y });
+                  }
+                }}
+                onTouchMove={(e) => {
+                  if (e.touches.length < 1) return;
+                  setSwipeEnd(e.touches[0].clientX);
+                  if (isDragging && zoomScale > 1) {
+                    setPanOffset({
+                      x: e.touches[0].clientX - dragStart.x,
+                      y: e.touches[0].clientY - dragStart.y
+                    });
+                  }
+                }}
+                onTouchEnd={() => {
+                  setIsDragging(false);
+                  if (zoomScale <= 1 && swipeStart !== null && swipeEnd !== null) {
+                    const dist = swipeStart - swipeEnd;
+                    if (dist > 40) handleNextStorm();
+                    else if (dist < -40) handlePrevStorm();
+                  }
+                  setSwipeStart(null);
+                  setSwipeEnd(null);
+                }}
+              >
+                {displayImg ? (
+                  <img
+                    key={selectedStormId}
+                    src={displayImg}
+                    alt={`Forecast track visualizer for ${stormLabel}`}
+                    style={{
+                      transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                      cursor: zoomScale > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+                      transition: isDragging ? "none" : "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
+                    }}
+                    className="max-w-full max-h-[70vh] sm:max-h-[78vh] object-contain rounded-xl sm:rounded-2xl shadow-2xl select-none animate-in fade-in duration-200"
+                    onClick={(e) => e.stopPropagation()}
+                    onDragStart={(e) => e.preventDefault()}
+                  />
+                ) : (
+                  <div className="text-center p-6 sm:p-8 flex flex-col items-center gap-3 bg-slate-900/90 border border-white/10 rounded-2xl z-10 max-w-sm" onClick={(e) => e.stopPropagation()}>
+                    <Database className="w-10 sm:w-12 h-10 sm:h-12 text-slate-600 animate-pulse" />
+                    <span className="text-xs sm:text-sm font-bold text-slate-300">
+                      No forecast track image available.
+                    </span>
+                  </div>
+                )}
+              </div>
+
+              {/* Bottom Dock */}
+              <div
+                className="z-50 flex items-center gap-2 bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-2xl pointer-events-auto"
+                onClick={(e) => e.stopPropagation()}
+              >
+                {hasMultipleStorms && (
+                  <button
+                    onClick={handlePrevStorm}
+                    className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow"
+                    title="Previous Storm (Left Arrow)"
+                  >
+                    <ChevronLeft className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                    <span className="text-[11px]">Prev</span>
+                  </button>
+                )}
+
+                <div className="flex items-center gap-1 px-1">
+                  {allStormOptions.map((sid) => (
+                    <button
+                      key={sid}
+                      onClick={(e) => { e.stopPropagation(); resetZoom(); setSelectedStormId(sid); }}
+                      className={`h-2 rounded-full transition-all cursor-pointer ${
+                        sid === selectedStormId ? "w-4 sm:w-5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" : "w-1.5 sm:w-2 bg-slate-700 hover:bg-slate-500"
+                      }`}
+                      title={sid === "latest" ? "All Systems" : sid}
+                    />
+                  ))}
+                </div>
+
+                {hasMultipleStorms && (
+                  <button
+                    onClick={handleNextStorm}
+                    className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow"
+                    title="Next Storm (Right Arrow)"
+                  >
+                    <span className="text-[11px]">Next</span>
+                    <ChevronRight className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+          );
+        }
+
+        // Mode 3: Standard Forecast Models Modal View
+        const currentModalKey = enlargedModelKey || selectedModel;
+        const activeInfo = MODEL_INFO[currentModalKey];
+        let displayImg = enlargedImage;
+
+        if (currentModalKey && activeConfigId) {
+          const parts = activeConfigId.split('-');
+          const type = parts[0];
+          const modelTime = parts.slice(1).join('-');
+          const opt = FORECAST_OPTIONS.find(
+            (o) => o.model === currentModalKey && o.type === type && o.modelTime === modelTime
+          );
+          const isAvailable = opt ? availableIds.includes(opt.id) : false;
+          displayImg = isAvailable ? (resolvedSrcs[opt.id] || opt.imageSrc) : null;
+          if (currentModalKey === "fnv3_large" && showClusters && displayImg) {
+            displayImg = displayImg.replace(".png", "_cluster.png");
+          }
+        }
+
+        return (
+          <div
+            className="fixed inset-0 z-[9999] flex flex-col items-center justify-between bg-black/95 p-2 sm:p-4 md:p-6 backdrop-blur-md overflow-hidden select-none"
+            onClick={handleCloseEnlarged}
+          >
+            {/* Modal Header Toolbar */}
+            <div
+              className="w-full z-50 flex flex-col gap-2 pointer-events-none"
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Row 1: Active Badge, Center Keyboard Guide, Right Controls */}
+              <div className="flex items-center justify-between gap-2 w-full pointer-events-auto">
+                {/* Active Model & Cycle Badge */}
+                <div className="flex items-center gap-1.5 sm:gap-2 shrink-0">
+                  {activeInfo ? (
+                    <div className="flex items-center gap-1.5 sm:gap-2 px-2.5 sm:px-3.5 py-1.5 bg-slate-900/90 backdrop-blur-md rounded-xl sm:rounded-2xl border border-white/10 shadow-xl">
+                      <span className="text-xs font-black text-white">{activeInfo.name}</span>
+                      <span className="text-[9px] uppercase font-bold text-slate-400 bg-slate-950 px-1.5 py-0.5 rounded border border-white/5">
+                        {activeInfo.type.split(" ")[0]}
+                      </span>
+                      {current && (
+                        <span className="hidden sm:inline text-[10px] font-mono text-cyan-400 font-semibold bg-cyan-950/40 px-2 py-0.5 rounded border border-cyan-500/20">
+                          {current.type === "5day" ? "5-Day" : "15-Day"}
+                        </span>
+                      )}
+                    </div>
+                  ) : (
+                    <div className="bg-slate-900/90 backdrop-blur-md px-3 py-1.5 rounded-xl border border-white/10 flex items-center gap-2 shadow-xl">
+                      <Maximize2 className="w-4 h-4 text-cyan-400" />
+                      <span className="text-xs font-black text-white uppercase tracking-wider">Visualizer</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Keyboard Shortcut Hints (Desktop) */}
+                <div className="hidden md:flex items-center gap-2 px-3 py-1.5 bg-slate-900/90 backdrop-blur-md rounded-xl border border-white/10 text-[10px] font-mono text-slate-300 shadow-xl">
+                  <Keyboard className="w-3.5 h-3.5 text-cyan-400" />
+                  <span><strong className="text-cyan-300">◀ ▶</strong> Model</span>
+                  <span className="text-slate-600">•</span>
+                  <span><strong className="text-cyan-300">▲ ▼</strong> Cycle</span>
+                  <span className="text-slate-600">•</span>
+                  <span><strong className="text-cyan-300">ESC</strong> Close</span>
+                </div>
+
+                {/* Right Controls (Zoom & Close) */}
+                <div className="flex items-center gap-1 bg-slate-900/90 backdrop-blur-md p-1 rounded-xl sm:rounded-2xl border border-white/10 shadow-xl shrink-0">
+                  <div className="text-[10px] font-black text-slate-300 px-2 hidden sm:block">
+                    {zoomScale.toFixed(1)}x
+                  </div>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setZoomScale(Math.min(4, zoomScale + 0.5)); }}
+                    className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-slate-800 text-white transition cursor-pointer"
+                    title="Zoom In (+)"
+                  >
+                    <ZoomIn className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setZoomScale(Math.max(1, zoomScale - 0.5)); }}
+                    className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-slate-800 text-white transition cursor-pointer"
+                    title="Zoom Out (-)"
+                  >
+                    <ZoomOut className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={(e) => { e.stopPropagation(); resetZoom(); }}
+                    className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-slate-800 text-white transition cursor-pointer"
+                    title="Reset Zoom (R)"
+                  >
+                    <RotateCcw className="w-4 h-4" />
+                  </button>
+                  <button
+                    onClick={handleCloseEnlarged}
+                    className="p-1.5 sm:p-2 rounded-lg sm:rounded-xl hover:bg-red-500/20 text-red-400 hover:text-red-300 transition cursor-pointer ml-1"
+                    title="Close (ESC)"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+
+              {/* Row 2: Model Pills Strip (compact, scrollable) */}
+              {activeInfo && (
+                <div className="flex items-center gap-1 overflow-x-auto no-scrollbar py-1 px-1.5 bg-slate-900/80 backdrop-blur-md rounded-xl border border-white/10 pointer-events-auto shadow-lg max-w-full">
+                  {modelKeys.map((mk) => {
+                    const isAct = mk === currentModalKey;
+                    const shortName = MODEL_INFO[mk].name.replace("GDM ", "").replace("ECMWF ", "");
+                    return (
+                      <button
+                        key={mk}
+                        onClick={(e) => { e.stopPropagation(); resetZoom(); setEnlargedModelKey(mk); setSelectedModel(mk); }}
+                        className={`px-2.5 py-1 text-[10px] font-bold rounded-lg transition-all whitespace-nowrap cursor-pointer shrink-0 ${
+                          isAct
+                            ? "bg-cyan-500 text-slate-950 font-black shadow-[0_0_10px_rgba(34,211,238,0.5)]"
+                            : "text-slate-400 hover:text-white hover:bg-slate-800/60"
+                        }`}
+                      >
+                        {shortName}
+                      </button>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+
+            {/* Left Chevron (Previous Model, hidden on mobile/small screens) */}
+            <button
+              onClick={handlePrevModel}
+              title="Previous model (Left Arrow)"
+              className="hidden sm:flex absolute left-5 top-1/2 -translate-y-1/2 z-50 p-3.5 bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer items-center justify-center backdrop-blur-sm"
+            >
+              <ChevronLeft className="w-6 h-6" />
+            </button>
+
+            {/* Right Chevron (Next Model, hidden on mobile/small screens) */}
+            <button
+              onClick={handleNextModel}
+              title="Next model (Right Arrow)"
+              className="hidden sm:flex absolute right-5 top-1/2 -translate-y-1/2 z-50 p-3.5 bg-slate-900/80 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-2xl border border-white/10 shadow-2xl transition-all hover:scale-110 active:scale-95 cursor-pointer items-center justify-center backdrop-blur-sm"
+            >
+              <ChevronRight className="w-6 h-6" />
+            </button>
+
+            {/* Center Image Container with Gestures */}
+            <div
+              className="w-full h-full flex items-center justify-center relative overflow-hidden py-2"
+              onWheel={handleWheel}
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUp}
+              onMouseLeave={handleMouseUp}
+              onTouchStart={(e) => {
+                if (e.touches.length < 1) return;
+                setSwipeStart(e.touches[0].clientX);
+                if (zoomScale > 1) {
+                  setIsDragging(true);
+                  setDragStart({ x: e.touches[0].clientX - panOffset.x, y: e.touches[0].clientY - panOffset.y });
+                }
+              }}
+              onTouchMove={(e) => {
+                if (e.touches.length < 1) return;
+                setSwipeEnd(e.touches[0].clientX);
+                if (isDragging && zoomScale > 1) {
+                  setPanOffset({
+                    x: e.touches[0].clientX - dragStart.x,
+                    y: e.touches[0].clientY - dragStart.y
+                  });
+                }
+              }}
+              onTouchEnd={() => {
+                setIsDragging(false);
+                if (zoomScale <= 1 && swipeStart !== null && swipeEnd !== null) {
+                  const dist = swipeStart - swipeEnd;
+                  if (dist > 40) handleNextModel();
+                  else if (dist < -40) handlePrevModel();
+                }
+                setSwipeStart(null);
+                setSwipeEnd(null);
+              }}
+            >
+              {displayImg ? (
+                <img
+                  key={currentModalKey || displayImg}
+                  src={displayImg}
+                  alt="Enlarged forecast map visualizer"
+                  style={{
+                    transform: `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomScale})`,
+                    cursor: zoomScale > 1 ? (isDragging ? "grabbing" : "grab") : "default",
+                    transition: isDragging ? "none" : "transform 0.25s cubic-bezier(0.16, 1, 0.3, 1)"
+                  }}
+                  className="max-w-full max-h-[70vh] sm:max-h-[78vh] object-contain rounded-xl sm:rounded-2xl shadow-2xl select-none animate-in fade-in duration-200"
+                  onClick={(e) => e.stopPropagation()}
+                  onDragStart={(e) => e.preventDefault()}
+                />
+              ) : (
+                <div className="text-center p-6 sm:p-8 flex flex-col items-center gap-3 bg-slate-900/90 border border-white/10 rounded-2xl z-10 max-w-sm" onClick={(e) => e.stopPropagation()}>
+                  <Database className="w-10 sm:w-12 h-10 sm:h-12 text-slate-600 animate-pulse" />
+                  <span className="text-xs sm:text-sm font-bold text-slate-300">
+                    No forecast map image available for {activeInfo ? activeInfo.name : "this model"} at this cycle.
+                  </span>
+                  <span className="text-[11px] text-slate-500 font-medium">Use ◀ ▶ arrow keys or buttons to view another model.</span>
+                </div>
+              )}
+            </div>
+
+            {/* Bottom Dock Navigation Bar */}
+            <div
+              className="z-50 flex items-center gap-2 bg-slate-900/95 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/10 shadow-2xl pointer-events-auto"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <button
+                onClick={handlePrevModel}
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow"
+                title="Previous Model (Left Arrow)"
+              >
+                <ChevronLeft className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+                <span className="text-[11px]">Prev</span>
+              </button>
+
+              <div className="flex items-center gap-1 px-1">
+                {modelKeys.map((mk) => (
+                  <button
+                    key={mk}
+                    onClick={(e) => { e.stopPropagation(); resetZoom(); setEnlargedModelKey(mk); setSelectedModel(mk); }}
+                    className={`h-2 rounded-full transition-all cursor-pointer ${
+                      mk === currentModalKey ? "w-4 sm:w-5 bg-cyan-400 shadow-[0_0_8px_rgba(34,211,238,0.8)]" : "w-1.5 sm:w-2 bg-slate-700 hover:bg-slate-500"
+                    }`}
+                    title={MODEL_INFO[mk].name}
+                  />
+                ))}
+              </div>
+
+              <button
+                onClick={handleNextModel}
+                className="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 bg-slate-800 hover:bg-cyan-500 hover:text-slate-950 text-white rounded-full text-xs font-bold transition-all cursor-pointer shadow"
+                title="Next Model (Right Arrow)"
+              >
+                <span className="text-[11px]">Next</span>
+                <ChevronRight className="w-3.5 sm:w-4 h-3.5 sm:h-4" />
+              </button>
+
+              {/* Cycle Up/Down buttons in dock */}
+              {timelineConfigs.length > 1 && (
+                <div className="flex items-center gap-1 pl-2 border-l border-white/10">
+                  <button
+                    onClick={handlePrevCycle}
+                    title="Previous Cycle (Up Arrow)"
+                    className="p-1 hover:text-cyan-400 text-slate-400 cursor-pointer rounded hover:bg-slate-800 transition"
+                  >
+                    <ChevronUp className="w-3.5 h-3.5" />
+                  </button>
+                  <span className="text-[10px] font-mono text-cyan-300 font-semibold px-1 hidden sm:inline">
+                    {current?.type === "5day" ? "5D" : "15D"}
+                  </span>
+                  <button
+                    onClick={handleNextCycle}
+                    title="Next Cycle (Down Arrow)"
+                    className="p-1 hover:text-cyan-400 text-slate-400 cursor-pointer rounded hover:bg-slate-800 transition"
+                  >
+                    <ChevronDown className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
+        );
+      })()}
+
+    </section>
+  );
+};
+
+export default Forecast;
