@@ -4,12 +4,12 @@
   "track_id": "WP302026",
   "latest": {
     "lat": 23.1,
-    "lon": 139.3,
-    "pressure_hpa": 984.0,
+    "lon": 139.1,
+    "pressure_hpa": 982.0,
     "wind_kt": 70.0,
     "wind_kmh": 130,
-    "movement": "W at 10.4 km/h (5.6 kt)",
-    "init_time": "2026-11-03 00:00",
+    "movement": "W at 3.4 km/h (1.8 kt)",
+    "init_time": "2026-11-03 06:00",
     "category": "Typhoon"
   },
   "history": [
@@ -423,6 +423,15 @@
       "lat": 23.1,
       "lon": 139.3,
       "pressure_hpa": 984.0,
+      "wind_kt": 70.0,
+      "wind_kmh": 130,
+      "category": "Typhoon"
+    },
+    {
+      "cycle": "2026-11-03 06:00",
+      "lat": 23.1,
+      "lon": 139.1,
+      "pressure_hpa": 982.0,
       "wind_kt": 70.0,
       "wind_kmh": 130,
       "category": "Typhoon"
