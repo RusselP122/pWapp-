@@ -46,3 +46,8 @@ zoom_earth_atcf_storm_map.py
 ai_precip_outlook.py
 ai_temp_outlook.py
 ai_thunderstorm_outlook.py
+himawari_sandwich_processor.py
+himawari_philippines_sandwich.py
+himwari_philippines_sandwhich.py
+generate_cfsv2_enso_graphic.py
+dry.py
