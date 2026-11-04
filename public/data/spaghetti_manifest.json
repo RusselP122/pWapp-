@@ -561,7 +561,7 @@
     "unique_key": "WP30_20261103T18Z",
     "filename": "WP30_20261103_18Z_gdm_wncv3.png",
     "alt_filename": "WP30_20261103_18Z_gdm_wncv3.png",
-    "timestamp": "2026-11-04T02:21:29.039457+00:00"
+    "timestamp": "2026-11-04T05:29:07.100054+00:00"
   },
   {
     "storm_id": "WP30",
@@ -572,7 +572,7 @@
     "unique_key": "WP30_20261103T18Z",
     "filename": "WP30_20261103_18Z_gdm_wnc_large.png",
     "alt_filename": "WP30_20261103_18Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-04T02:21:39.740829+00:00"
+    "timestamp": "2026-11-04T05:29:29.890158+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -584,7 +584,7 @@
     "filename": "MONITORING_LPA01_20261103_18Z_gdm_wncv3.png",
     "alt_filename": "MONITORING_LPA01_20261103_18Z_gdm_wncv3.png",
     "is_monitoring": true,
-    "timestamp": "2026-11-04T02:21:44.015754+00:00"
+    "timestamp": "2026-11-04T05:29:37.840488+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -596,7 +596,7 @@
     "filename": "MONITORING_LPA01_20261103_18Z_gdm_wnc_large.png",
     "alt_filename": "MONITORING_LPA01_20261103_18Z_gdm_wnc_large.png",
     "is_monitoring": true,
-    "timestamp": "2026-11-04T02:22:08.929182+00:00"
+    "timestamp": "2026-11-04T05:30:30.228078+00:00"
   },
   {
     "storm_id": "MONITORING_LPA02",
@@ -608,7 +608,7 @@
     "filename": "MONITORING_LPA02_20261103_18Z_gdm_wnc_large.png",
     "alt_filename": "MONITORING_LPA02_20261103_18Z_gdm_wnc_large.png",
     "is_monitoring": true,
-    "timestamp": "2026-11-04T02:22:15.908463+00:00"
+    "timestamp": "2026-11-04T05:30:44.727844+00:00"
   },
   {
     "storm_id": "MONITORING_LPA03",
@@ -620,7 +620,7 @@
     "filename": "MONITORING_LPA03_20261103_18Z_gdm_wnc_large.png",
     "alt_filename": "MONITORING_LPA03_20261103_18Z_gdm_wnc_large.png",
     "is_monitoring": true,
-    "timestamp": "2026-11-04T02:22:17.248604+00:00"
+    "timestamp": "2026-11-04T05:30:47.511665+00:00"
   },
   {
     "storm_id": "MONITORING_LPA04",
@@ -632,6 +632,6 @@
     "filename": "MONITORING_LPA04_20261103_18Z_gdm_wnc_large.png",
     "alt_filename": "MONITORING_LPA04_20261103_18Z_gdm_wnc_large.png",
     "is_monitoring": true,
-    "timestamp": "2026-11-04T02:22:18.354373+00:00"
+    "timestamp": "2026-11-04T05:30:49.654548+00:00"
   }
 ]
