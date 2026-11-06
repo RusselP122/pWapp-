@@ -620,7 +620,7 @@ for mode in ['standard', 'cluster']:
     gl.right_labels = False
     
     ax.text(
-        118 - 180, 13, 'West Philippine\nSea', fontsize=5, color='navy', weight='bold',
+        118 - 180, 13, 'West Philippine\nSea', fontsize=8, color='navy', weight='bold',
         transform=projection, ha='center', va='center', style='italic', alpha=0.5
     )
     ax.text(
