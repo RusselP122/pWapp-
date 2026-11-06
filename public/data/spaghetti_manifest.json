@@ -3,86 +3,6 @@
     "storm_id": "WP99",
     "atcf_id": "99W",
     "init_date": "20261104",
-    "cycle": "00Z",
-    "model": "gdm_wncv3",
-    "unique_key": "WP99_20261104T00Z",
-    "filename": "WP99_20261104_00Z_gdm_wncv3.png",
-    "alt_filename": "WP99_20261104_00Z_gdm_wncv3.png",
-    "timestamp": "2026-11-04T08:22:37.249663+00:00"
-  },
-  {
-    "storm_id": "WP30",
-    "atcf_id": "30W",
-    "init_date": "20261104",
-    "cycle": "00Z",
-    "model": "gdm_wncv3",
-    "unique_key": "WP30_20261104T00Z",
-    "filename": "WP30_20261104_00Z_gdm_wncv3.png",
-    "alt_filename": "WP30_20261104_00Z_gdm_wncv3.png",
-    "timestamp": "2026-11-04T08:22:39.624538+00:00"
-  },
-  {
-    "storm_id": "WP99",
-    "atcf_id": "99W",
-    "init_date": "20261104",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "WP99_20261104T00Z",
-    "filename": "WP99_20261104_00Z_gdm_wnc_large.png",
-    "alt_filename": "WP99_20261104_00Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-04T14:04:07.509729+00:00"
-  },
-  {
-    "storm_id": "WP30",
-    "atcf_id": "30W",
-    "init_date": "20261104",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "WP30_20261104T00Z",
-    "filename": "WP30_20261104_00Z_gdm_wnc_large.png",
-    "alt_filename": "WP30_20261104_00Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-04T14:04:15.326573+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261104",
-    "cycle": "00Z",
-    "model": "gdm_wncv3",
-    "unique_key": "MONITORING_LPA01_20261104T00Z",
-    "filename": "MONITORING_LPA01_20261104_00Z_gdm_wncv3.png",
-    "alt_filename": "MONITORING_LPA01_20261104_00Z_gdm_wncv3.png",
-    "is_monitoring": true,
-    "timestamp": "2026-11-04T08:23:22.761123+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261104",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261104T00Z",
-    "filename": "MONITORING_LPA01_20261104_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261104_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "timestamp": "2026-11-04T14:05:11.320936+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA02",
-    "atcf_id": "LPA02",
-    "init_date": "20261104",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA02_20261104T00Z",
-    "filename": "MONITORING_LPA02_20261104_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA02_20261104_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "timestamp": "2026-11-04T14:04:54.181051+00:00"
-  },
-  {
-    "storm_id": "WP99",
-    "atcf_id": "99W",
-    "init_date": "20261104",
     "cycle": "06Z",
     "model": "gdm_wncv3",
     "unique_key": "WP99_20261104T06Z",
@@ -430,5 +350,39 @@
     "filename": "WP99_20261105_18Z_gdm_wnc_large.png",
     "alt_filename": "WP99_20261105_18Z_gdm_wnc_large.png",
     "timestamp": "2026-11-06T05:45:29.991964+00:00"
+  },
+  {
+    "storm_id": "WP31",
+    "atcf_id": "31W",
+    "init_date": "20261105",
+    "cycle": "18Z",
+    "model": "gdm_wncv3",
+    "unique_key": "WP31_20261105T18Z",
+    "filename": "WP31_20261105_18Z_gdm_wncv3.png",
+    "alt_filename": "WP31_20261105_18Z_gdm_wncv3.png",
+    "timestamp": "2026-11-06T08:08:53.378060+00:00"
+  },
+  {
+    "storm_id": "WP31",
+    "atcf_id": "31W",
+    "init_date": "20261106",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "WP31_20261106T00Z",
+    "filename": "WP31_20261106_00Z_gdm_wnc_large.png",
+    "alt_filename": "WP31_20261106_00Z_gdm_wnc_large.png",
+    "timestamp": "2026-11-06T08:09:23.128005+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261106",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261106T00Z",
+    "filename": "MONITORING_LPA01_20261106_00Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261106_00Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "timestamp": "2026-11-06T08:09:31.285661+00:00"
   }
 ]
