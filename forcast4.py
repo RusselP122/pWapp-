@@ -637,6 +637,14 @@ for mode in ['standard', 'cluster']:
                                  transform=projection))
                                  
     if mode == 'standard':
+        # Styling parameters optimized for dense 1000-member ensemble visualization
+        track_linewidth = 1.2      # Slimmer track line (was 2.5) to avoid thick overlapping swaths
+        track_alpha = 0.6          # Track line opacity (was 0.7)
+        dot_markersize = 2.5       # Marker ring size (was 5.0) to eliminate oversized blobs
+        dot_markeredgewidth = 0.8  # Marker edge stroke width (was 1.5)
+        dot_shadow_size = 3.5      # Drop shadow size (was 8.0)
+        dot_shadow_alpha = 0.15    # Drop shadow opacity (was 0.20)
+
         for item in track_plot_data:
             valid_samples = item['valid_samples']
             for s in valid_samples:
@@ -651,8 +659,8 @@ for mode in ['standard', 'cluster']:
                 ax.plot(
                     lons_crop, lats_crop,
                     color='#404040',
-                    linewidth=2.5,
-                    alpha=0.7,
+                    linewidth=track_linewidth,
+                    alpha=track_alpha,
                     zorder=3,
                     transform=projection
                 )
@@ -661,10 +669,11 @@ for mode in ['standard', 'cluster']:
                     color = get_pressure_color(pressures_crop[i])
                     if color is None:
                         continue
-                    ax.plot(lons_crop[i], lats_crop[i], color='black', marker='o', markersize=8,
-                            markeredgewidth=0, alpha=0.2, zorder=4, transform=projection)
+                    if dot_shadow_size > 0 and dot_shadow_alpha > 0:
+                        ax.plot(lons_crop[i], lats_crop[i], color='black', marker='o', markersize=dot_shadow_size,
+                                markeredgewidth=0, alpha=dot_shadow_alpha, zorder=4, transform=projection)
                     ax.plot(lons_crop[i], lats_crop[i], markerfacecolor='none', markeredgecolor=color,
-                            marker='o', markersize=5, markeredgewidth=1.5,
+                            marker='o', markersize=dot_markersize, markeredgewidth=dot_markeredgewidth,
                             zorder=4, transform=projection)
                 plotted_tracks += 1
                 
@@ -679,8 +688,8 @@ for mode in ['standard', 'cluster']:
         legend_elements = [
             plt.Line2D(
                 [0], [0], marker='o', color='none', markerfacecolor='none',
-                markeredgecolor=range_info['color'], markeredgewidth=2,
-                markersize=8, label=range_info['pressure_range']
+                markeredgecolor=range_info['color'], markeredgewidth=1.5,
+                markersize=6, label=range_info['pressure_range']
             )
             for range_info in pressure_ranges
         ]
