@@ -17,8 +17,10 @@ import matplotlib.patheffects as path_effects
 import matplotlib.patches as mpatches
 from matplotlib.collections import LineCollection
 import matplotlib.colors as mcolors
+import matplotlib.ticker as mticker
 import cartopy.crs as ccrs
 import cartopy.feature as cfeature
+from cartopy.mpl.gridliner import LongitudeFormatter
 from shapely.geometry import shape, Point
 from shapely.strtree import STRtree
 import urllib.request
@@ -85,8 +87,11 @@ def fetch_knack_active_storms():
                     pass
                     
             atcf_id = item.get('atcf_id', '')
-            # Filter only Western Pacific storms
-            if not (atcf_id.upper().endswith('W') or atcf_id.upper().startswith('WP')):
+            # Filter Western Pacific and Central Pacific storms/invests
+            atcf_upper = atcf_id.upper()
+            is_wp = atcf_upper.endswith('W') or atcf_upper.startswith('WP') or (100.0 <= lon <= 180.0 and 0.0 <= lat <= 50.0)
+            is_cp = atcf_upper.endswith('C') or atcf_upper.startswith('CP') or (-180.0 <= lon <= -140.0 and 0.0 <= lat <= 50.0)
+            if not (is_wp or is_cp):
                 continue
                 
             raw_w = item.get('winds')
@@ -96,6 +101,7 @@ def fetch_knack_active_storms():
                 'name': item.get('storm_name', 'INVEST'),
                 'lat': lat,
                 'lon': lon,
+                'basin': 'CP' if is_cp and not is_wp else 'WP',
                 'init_time': init_time,
                 'winds': float(raw_w) if raw_w is not None else None,
                 'pressure': float(raw_p) if raw_p is not None else None
@@ -140,9 +146,51 @@ def get_ph_municipalities_tree():
 def haversine_km(lat1, lon1, lat2, lon2):
     R = 6371.0
     dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
+    diff_lon = (lon2 - lon1 + 180.0) % 360.0 - 180.0
+    dlon = math.radians(diff_lon)
     a = math.sin(dlat / 2.0)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2.0)**2
     return R * 2.0 * math.asin(math.sqrt(a))
+
+def mean_geo_center(points, lons=None):
+    """
+    Computes the geographic centroid using spherical (3D Cartesian) averaging,
+    correctly handling dateline / antimeridian wrapping (-180 / +180).
+    Supports either:
+    1. points as list of dicts [{'lat': ..., 'lon': ...}]
+    2. points as lats list, with second argument lons list: mean_geo_center(lats, lons) -> (lat, lon)
+    """
+    is_lat_lon_pair = False
+    if lons is not None:
+        is_lat_lon_pair = True
+        lats = points
+        pts = [{'lat': lat, 'lon': lon} for lat, lon in zip(lats, lons) if not np.isnan(lat) and not np.isnan(lon)]
+    elif isinstance(points, (list, tuple)) and points and isinstance(points[0], (list, tuple)):
+        pts = [{'lat': p[0], 'lon': p[1]} for p in points if not np.isnan(p[0]) and not np.isnan(p[1])]
+    else:
+        pts = [p for p in points if not np.isnan(p.get('lat', np.nan)) and not np.isnan(p.get('lon', np.nan))]
+
+    if len(pts) == 0:
+        return (15.0, 135.0) if is_lat_lon_pair else {'lat': 0.0, 'lon': 0.0}
+
+    sum_x = 0.0
+    sum_y = 0.0
+    sum_z = 0.0
+    for pt in pts:
+        lat_rad = math.radians(pt['lat'])
+        lon_rad = math.radians(pt['lon'])
+        sum_x += math.cos(lat_rad) * math.cos(lon_rad)
+        sum_y += math.cos(lat_rad) * math.sin(lon_rad)
+        sum_z += math.sin(lat_rad)
+    n = len(pts)
+    avg_x = sum_x / n
+    avg_y = sum_y / n
+    avg_z = sum_z / n
+    hyp = math.sqrt(avg_x * avg_x + avg_y * avg_y)
+    lat = math.degrees(math.atan2(avg_z, hyp))
+    lon = math.degrees(math.atan2(avg_y, avg_x))
+    if is_lat_lon_pair:
+        return lat, lon
+    return {'lat': lat, 'lon': lon}
 
 def format_percentage(cnt, total):
     """
@@ -194,6 +242,11 @@ def check_single_track_landfall(tdf, tree, geoms, props):
 
         # Landfall must occur at forecast lead time > 0
         if h2 <= 0:
+            continue
+
+        # Dateline crossing, Western hemisphere (lon < 0), or CPAC (lon > 180) cannot touch the Philippines (116E to 127E)
+        if abs(x2 - x1) > 180.0 or x1 < 0.0 or x2 < 0.0 or x1 > 180.0 or x2 > 180.0:
+            was_over_water = True
             continue
 
         # Quick bounding box pre-filter for Philippine archipelago (116E to 127E, 4.5N to 22N)
@@ -457,30 +510,6 @@ def compute_ph_landfalls(track_dfs, total_members, init_dt, ctrl_df=None, mean_d
         'offshore_val': offshore_val
     }
 
-def mean_geo_center(points):
-    """
-    Computes the geographic centroid of a list of {'lat': ..., 'lon': ...} dicts
-    using spherical (3D Cartesian) averaging. Matches generate_trends_map.py.
-    """
-    if len(points) == 0:
-        return {'lat': 0.0, 'lon': 0.0}
-    sum_x = 0.0
-    sum_y = 0.0
-    sum_z = 0.0
-    for pt in points:
-        lat_rad = math.radians(pt['lat'])
-        lon_rad = math.radians(pt['lon'])
-        sum_x += math.cos(lat_rad) * math.cos(lon_rad)
-        sum_y += math.cos(lat_rad) * math.sin(lon_rad)
-        sum_z += math.sin(lat_rad)
-    n = len(points)
-    avg_x = sum_x / n
-    avg_y = sum_y / n
-    avg_z = sum_z / n
-    hyp = math.sqrt(avg_x * avg_x + avg_y * avg_y)
-    lat = math.degrees(math.atan2(avg_z, hyp))
-    lon = math.degrees(math.atan2(avg_y, avg_x))
-    return {'lat': lat, 'lon': lon}
 
 def run_hdbscan(distance_matrix, min_cluster_size):
     n = len(distance_matrix)
@@ -862,14 +891,18 @@ def normalize_dataframe(df):
 
 def filter_western_pacific(df):
     """
-    Retains only tracks whose INITIAL position (first available point)
-    lies within the Western Pacific basin bounds: Lon [100, 180], Lat [0, 50].
+    Retains tracks belonging to:
+    1. Western Pacific basin: Initial position in Lon [100, 180], Lat [0, 50].
+    2. Central Pacific (CPAC) basin: Initial position in Lon [-180, -140] or [180, 220], Lat [0, 50]
+       where member tracks move westward across the dateline and enter the Western Pacific (Lon [100, 180], Lat [0, 50]).
     """
     if df.empty:
         return df
 
-    # Find the first point of each unique track (grouped by track_id and sample)
     wp_tracks = []
+    cpac_tracks_by_tid = {}
+    entering_tids = set()
+
     for (t_id, s_val), track_points in df.groupby(['track_id', 'sample']):
         track_points = track_points.sort_values('lead_time_hours')
         if track_points.empty:
@@ -878,10 +911,30 @@ def filter_western_pacific(df):
         f_lat = first_pt['lat']
         f_lon = first_pt['lon']
         
-        # Check if the initial position is inside the Western Pacific boundary
-        if not np.isnan(f_lat) and not np.isnan(f_lon):
-            if 100.0 <= f_lon <= 180.0 and 0.0 <= f_lat <= 50.0:
-                wp_tracks.append((t_id, s_val))
+        if np.isnan(f_lat) or np.isnan(f_lon):
+            continue
+
+        # Check if initial position is in Western Pacific
+        if 100.0 <= f_lon <= 180.0 and 0.0 <= f_lat <= 50.0:
+            wp_tracks.append((t_id, s_val))
+        # Check if initial position is in Central Pacific (CPAC: -180 to -140 or 180 to 220)
+        elif ((-180.0 <= f_lon <= -140.0) or (180.0 <= f_lon <= 220.0)) and (0.0 <= f_lat <= 50.0):
+            if t_id not in cpac_tracks_by_tid:
+                cpac_tracks_by_tid[t_id] = []
+            cpac_tracks_by_tid[t_id].append((t_id, s_val))
+            
+            # Check if this track enters the Western Pacific at any forecast hour
+            has_wp_entry = any(
+                (100.0 <= r['lon'] <= 180.0 and 0.0 <= r['lat'] <= 50.0)
+                for _, r in track_points.iterrows()
+                if not np.isnan(r['lon']) and not np.isnan(r['lat'])
+            )
+            if has_wp_entry:
+                entering_tids.add(t_id)
+
+    # For any CPAC storm with members entering WPAC, retain all members of that storm to preserve the full ensemble plume
+    for tid in entering_tids:
+        wp_tracks.extend(cpac_tracks_by_tid[tid])
                 
     if not wp_tracks:
         return pd.DataFrame(columns=df.columns)
@@ -898,6 +951,7 @@ def filter_tracks_near_active_storms(df, knack_storms, max_dist_deg=8.0):
     """
     Filters tracks to only those with points near active Knack storms in their early stages (<= 60h).
     Vectorized for high performance with 1,000+ member WNC Large ensembles.
+    Handles distance wrapping across the dateline.
     """
     if df.empty or not knack_storms:
         return pd.DataFrame(columns=df.columns)
@@ -914,7 +968,8 @@ def filter_tracks_near_active_storms(df, knack_storms, max_dist_deg=8.0):
             continue
         d_lat = early_df['lat'] - k_lat
         cos_lat = np.cos(np.radians((early_df['lat'] + k_lat) / 2.0))
-        d_lon = (early_df['lon'] - k_lon) * cos_lat
+        raw_d_lon = (early_df['lon'] - k_lon + 180.0) % 360.0 - 180.0
+        d_lon = raw_d_lon * cos_lat
         dist = np.sqrt(d_lat**2 + d_lon**2)
         near_mask |= (dist <= max_dist_deg)
 
@@ -1183,10 +1238,12 @@ def cluster_genesis_locations(df, dist_threshold=6.0):
 def haversine_km(lat1, lon1, lat2, lon2):
     """
     Computes great-circle distance between two points in kilometers.
+    Wraps longitude difference across the antimeridian / dateline.
     """
     R = 6371.0
     dlat = math.radians(lat2 - lat1)
-    dlon = math.radians(lon2 - lon1)
+    diff_lon = (lon2 - lon1 + 180.0) % 360.0 - 180.0
+    dlon = math.radians(diff_lon)
     a = math.sin(dlat / 2)**2 + math.cos(math.radians(lat1)) * math.cos(math.radians(lat2)) * math.sin(dlon / 2)**2
     c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
     return R * c
@@ -1225,17 +1282,27 @@ def find_control_track_for_storm(df_storm, df_model, model_name, storm_name, atc
 
         best_paired_track = None
 
-        # Try matching by storm numerical identifier first (e.g. WP27, 27W, WP95, 95W)
+        # Try matching by storm numerical identifier first (e.g. WP31, 31W, CP04, 04C, etc.)
         if storm_num:
             for tid, t_df in paired_candidates.groupby('track_id'):
                 t_df = t_df.sort_values('lead_time_hours').dropna(subset=['lat', 'lon'])
                 if len(t_df) < 2:
                     continue
                 tid_str = str(tid).upper()
-                if f"WP{storm_num}" in tid_str or f"{storm_num}W" in tid_str or tid_str == storm_num:
+                if (
+                    f"WP{storm_num}" in tid_str or f"{storm_num}W" in tid_str or
+                    f"CP{storm_num}" in tid_str or f"{storm_num}C" in tid_str or
+                    f"EP{storm_num}" in tid_str or f"{storm_num}E" in tid_str or
+                    f"AL{storm_num}" in tid_str or f"{storm_num}L" in tid_str or
+                    f"IO{storm_num}" in tid_str or f"{storm_num}A" in tid_str or f"{storm_num}B" in tid_str or
+                    f"SH{storm_num}" in tid_str or f"{storm_num}S" in tid_str or f"{storm_num}P" in tid_str or
+                    tid_str == storm_num or re.search(rf'\b{storm_num}\b', tid_str)
+                ):
                     best_paired_track = t_df
                     break
-        else:
+
+        # Spatial distance fallback if track_id string matching didn't catch it
+        if best_paired_track is None:
             best_paired_dist = float('inf')
             if ref_lat is not None and ref_lon is not None:
                 for tid, t_df in paired_candidates.groupby('track_id'):
@@ -1247,7 +1314,7 @@ def find_control_track_for_storm(df_storm, df_model, model_name, storm_name, atc
                         t_early = t_df.head(1)
                     dists = [haversine_km(r['lat'], r['lon'], ref_lat, ref_lon) for _, r in t_early.iterrows()]
                     min_d = min(dists) if dists else float('inf')
-                    if min_d < 500.0 and min_d < best_paired_dist:
+                    if min_d < 600.0 and min_d < best_paired_dist:
                         best_paired_dist = min_d
                         best_paired_track = t_df
 
@@ -1630,18 +1697,20 @@ def plot_model_tracks(
 
     use_live_atcf = False
     if atcf_pos is not None and first_track_lat is not None and first_track_lon is not None:
-        gap_deg = np.sqrt((atcf_pos[0] - first_track_lat)**2 + (atcf_pos[1] - first_track_lon)**2)
+        d_lon_atcf = (atcf_pos[1] - first_track_lon + 180.0) % 360.0 - 180.0
+        gap_deg = np.sqrt((atcf_pos[0] - first_track_lat)**2 + d_lon_atcf**2)
         if gap_deg <= 3.0:
             use_live_atcf = True
 
     # Geographic region description
     all_first_lats = [tdf.iloc[0]['lat'] for tdf in deduped_track_dfs if not tdf.empty]
     all_first_lons = [tdf.iloc[0]['lon'] for tdf in deduped_track_dfs if not tdf.empty]
-    mean_gen_lat = np.mean(all_first_lats) if all_first_lats else 15.0
-    mean_gen_lon = np.mean(all_first_lons) if all_first_lons else 135.0
+    mean_gen_lat, mean_gen_lon = mean_geo_center(all_first_lats, all_first_lons)
 
     # Geographic region description
-    if mean_gen_lon < 114.0 and 4.0 <= mean_gen_lat <= 24.0:
+    if (-180.0 <= mean_gen_lon <= -140.0) or (180.0 <= mean_gen_lon <= 220.0) or (mean_gen_lon < 0):
+        region_desc = "in the Central Pacific / crossing Dateline"
+    elif 100.0 <= mean_gen_lon < 114.0 and 4.0 <= mean_gen_lat <= 24.0:
         region_desc = "in the South China Sea"
     elif 118.5 <= mean_gen_lon <= 123.5 and 19.5 <= mean_gen_lat <= 22.5:
         region_desc = "in the Luzon Strait / Bashi Channel"
@@ -1788,14 +1857,28 @@ def plot_model_tracks(
         current_winds = int(round(current_winds))
         current_pres = int(round(current_pres)) if current_pres else 1000
 
+    # Detect if any member track or position spans into the Central Pacific (CPAC) / across Dateline
+    has_cpac = any(p < 0.0 or p > 180.0 for tdf in deduped_track_dfs for p in tdf['lon'].dropna().values)
+    if atcf_pos is not None and (atcf_pos[1] < 0.0 or atcf_pos[1] > 180.0):
+        has_cpac = True
+    if not df_mean.empty and any(p < 0.0 or p > 180.0 for p in df_mean['lon'].dropna().values):
+        has_cpac = True
+
     # Viewport boundaries calculation
-    all_lons = [p for tdf in deduped_track_dfs for p in tdf['lon'].dropna().values if 90 <= p <= 180]
+    if has_cpac:
+        all_lons = [(p if p >= 0 else p + 360.0) for tdf in deduped_track_dfs for p in tdf['lon'].dropna().values]
+    else:
+        all_lons = [p for tdf in deduped_track_dfs for p in tdf['lon'].dropna().values if 90 <= p <= 180]
     all_lats = [p for tdf in deduped_track_dfs for p in tdf['lat'].dropna().values if 0 <= p <= 55]
     if atcf_pos is not None:
-        all_lons.append(atcf_pos[1])
+        pos_lon = atcf_pos[1] if not has_cpac else (atcf_pos[1] if atcf_pos[1] >= 0 else atcf_pos[1] + 360.0)
+        all_lons.append(pos_lon)
         all_lats.append(atcf_pos[0])
     if not df_mean.empty:
-        all_lons.extend(df_mean['lon'].dropna().values)
+        mean_lons = df_mean['lon'].dropna().values
+        if has_cpac:
+            mean_lons = [(x if x >= 0 else x + 360.0) for x in mean_lons]
+        all_lons.extend(mean_lons)
         all_lats.extend(df_mean['lat'].dropna().values)
 
     if all_lons and all_lats:
@@ -1803,8 +1886,12 @@ def plot_model_tracks(
         min_lat, max_lat = min(all_lats), max(all_lats)
         pad_lon = max(4.0, (max_lon - min_lon) * 0.18)
         pad_lat = max(3.0, (max_lat - min_lat) * 0.18)
-        view_lon_min = max(100.0, min_lon - pad_lon)
-        view_lon_max = min(180.0, max_lon + pad_lon)
+        if has_cpac:
+            view_lon_min = max(100.0, min_lon - pad_lon)
+            view_lon_max = min(220.0, max_lon + pad_lon)
+        else:
+            view_lon_min = max(100.0, min_lon - pad_lon)
+            view_lon_max = min(180.0, max_lon + pad_lon)
         view_lat_min = max(0.0, min_lat - pad_lat)
         view_lat_max = min(50.0, max_lat + pad_lat)
     else:
@@ -1815,8 +1902,9 @@ def plot_model_tracks(
     # Setup the 16:9 widescreen canvas
     fig = plt.figure(figsize=(16, 9.5), facecolor='#070a0f')
 
-    # Map Axis
-    ax_map = fig.add_axes([0.035, 0.20, 0.585, 0.70], projection=ccrs.PlateCarree())
+    # Map Axis: Use central_longitude=180 if spanning CPAC/dateline, else standard PlateCarree
+    map_proj = ccrs.PlateCarree(central_longitude=180) if has_cpac else ccrs.PlateCarree()
+    ax_map = fig.add_axes([0.035, 0.20, 0.585, 0.70], projection=map_proj)
     ax_map.set_facecolor('#0b1329')
 
     # Cartopy features (50m high-resolution for smooth, natural geography matching ph_provinces)
@@ -1877,11 +1965,14 @@ def plot_model_tracks(
         )
 
     # Gridlines
-    gl = ax_map.gridlines(draw_labels=True, linewidth=0.4, color='#334155', alpha=0.4, linestyle=':')
+    gl = ax_map.gridlines(draw_labels=True, linewidth=0.4, color='#334155', alpha=0.4, linestyle=':', crs=ccrs.PlateCarree())
     gl.top_labels = False
     gl.right_labels = False
     gl.xlabel_style = {'size': 8.0, 'color': '#64748b', 'weight': 'bold'}
     gl.ylabel_style = {'size': 8.0, 'color': '#64748b', 'weight': 'bold'}
+    if has_cpac:
+        gl.xlocator = mticker.FixedLocator([100, 110, 120, 130, 140, 150, 160, 170, 180, -170, -160, -150, -140])
+        gl.xformatter = LongitudeFormatter()
 
     # Colormap & Norm setup
     if color_by == 'pressure':
@@ -1943,9 +2034,11 @@ def plot_model_tracks(
         for i in range(len(lons) - 1):
             if np.isnan(lons[i]) or np.isnan(lons[i+1]) or np.isnan(lats[i]) or np.isnan(lats[i+1]):
                 continue
-            if abs(lons[i+1] - lons[i]) > 180:
+            p1_lon = lons[i] if not has_cpac else (lons[i] if lons[i] >= 0 else lons[i] + 360.0)
+            p2_lon = lons[i+1] if not has_cpac else (lons[i+1] if lons[i+1] >= 0 else lons[i+1] + 360.0)
+            if abs(p2_lon - p1_lon) > 180:
                 continue
-            segments.append([[lons[i], lats[i]], [lons[i+1], lats[i+1]]])
+            segments.append([[p1_lon, lats[i]], [p2_lon, lats[i+1]]])
             if color_by == 'pressure':
                 p_avg = np.nanmean([pressures[i], pressures[i+1]]) if not np.isnan(pressures[i]) else 1008.0
                 seg_vals.append(p_avg)
@@ -1989,7 +2082,10 @@ def plot_model_tracks(
     # Render Primary Track (Official Control or Calculated Ensemble Mean)
     plot_primary_track = len(df_mean) >= 2
     if plot_primary_track:
-        m_lons = list(df_mean['lon'].dropna().values)
+        if has_cpac:
+            m_lons = [x if x >= 0 else x + 360.0 for x in df_mean['lon'].dropna().values]
+        else:
+            m_lons = list(df_mean['lon'].dropna().values)
         m_lats = list(df_mean['lat'].dropna().values)
 
         # Double-pass stroke: white outline with dark core
@@ -2004,6 +2100,8 @@ def plot_model_tracks(
                 mx, my = row['lon'], row['lat']
                 if np.isnan(mx) or np.isnan(my):
                     continue
+                if has_cpac and mx < 0:
+                    mx += 360.0
                 if last_annot_pos is not None:
                     dist = np.sqrt((mx - last_annot_pos[0])**2 + (my - last_annot_pos[1])**2)
                     if dist < 2.5:
@@ -2244,7 +2342,7 @@ def plot_model_tracks(
 
         # Right Column (Path Consensus)
         ax_card1.text(0.52, 0.77, "PATH CONSENSUS", fontsize=6.8, weight='bold', color='#94a3b8', transform=ax_card1.transAxes)
-        offshore_label = "OPEN PACIFIC / RECURVING" if any(w in region_desc.lower() for w in ['philippine', 'pacific', 'marianas', 'caroline', 'marshall', 'micronesia']) else region_desc.upper().replace("IN THE ", "").replace("NEAR ", "")
+        offshore_label = "CENTRAL PACIFIC / DATELINE" if "central pacific" in region_desc.lower() else ("OPEN PACIFIC / RECURVING" if any(w in region_desc.lower() for w in ['philippine', 'pacific', 'marianas', 'caroline', 'marshall', 'micronesia']) else region_desc.upper().replace("IN THE ", "").replace("NEAR ", ""))
         f_lbl_sz = 5.7 if (len(offshore_label) > 18 or total_ensemble_members >= 1000) else 6.4
         f_pct_sz = 5.6 if total_ensemble_members >= 1000 else 6.3
         ax_card1.text(0.52, 0.66, offshore_label, fontsize=f_lbl_sz, weight='heavy', color='#f1f5f9', transform=ax_card1.transAxes)
@@ -2594,14 +2692,14 @@ def map_hdbscan_clusters_to_knack_storms(df, knack_storms, dist_threshold=4.0):
                     continue
                 target_pts = group_df[group_df['lead_time_hours'] == closest_lead]
                 
-            avg_lat = target_pts['lat'].mean()
-            avg_lon = target_pts['lon'].mean()
+            avg_lat, avg_lon = mean_geo_center(target_pts['lat'].dropna().tolist(), target_pts['lon'].dropna().tolist())
             
             if np.isnan(avg_lat) or np.isnan(avg_lon):
                 continue
                 
             d_lat = avg_lat - k_lat
-            d_lon = (avg_lon - k_lon) * math.cos(math.radians((avg_lat + k_lat)/2))
+            raw_d_lon = (avg_lon - k_lon + 180.0) % 360.0 - 180.0
+            d_lon = raw_d_lon * math.cos(math.radians((avg_lat + k_lat)/2))
             dist = math.sqrt(d_lat**2 + d_lon**2)
             
             if dist <= dist_threshold:
@@ -2783,10 +2881,10 @@ def main():
     # Fetch active storms from Knack API
     knack_storms = fetch_knack_active_storms()
     if knack_storms:
-        # Filter Knack active storms geographically to Western Pacific only
+        # Filter Knack active storms geographically to Western Pacific and Central Pacific
         knack_storms = [
             s for s in knack_storms 
-            if (s['lon'] >= 100 and s['lon'] <= 180 and s['lat'] >= 0 and s['lat'] <= 50)
+            if ((100.0 <= s['lon'] <= 180.0) or (-180.0 <= s['lon'] <= -140.0) or (180.0 <= s['lon'] <= 220.0)) and (0.0 <= s['lat'] <= 50.0)
         ]
 
     print(f"Processing files: {input_files}")
@@ -2900,9 +2998,11 @@ def main():
                 ymd = datetime.now(timezone.utc).strftime('%Y%m%d')
                 cycle_str = "00Z"
                 
-            # Extract storm identifiers (e.g. WP922026 -> WP92 & 92W)
+            # Extract storm identifiers (e.g. WP922026 -> WP92 & 92W, CP012026 -> CP01 & 01C)
             match_wp = re.search(r'WP(\d{2})', rep_track_id.upper())
             match_w = re.search(r'(\d{2})W', rep_track_id.upper())
+            match_cp = re.search(r'CP(\d{2})', rep_track_id.upper())
+            match_c = re.search(r'(\d{2})C', rep_track_id.upper())
             if match_wp:
                 num_str = match_wp.group(1)
                 wp_id = f"WP{num_str}"
@@ -2911,6 +3011,14 @@ def main():
                 num_str = match_w.group(1)
                 wp_id = f"WP{num_str}"
                 num_w_id = f"{num_str}W"
+            elif match_cp:
+                num_str = match_cp.group(1)
+                wp_id = f"CP{num_str}"
+                num_w_id = f"{num_str}C"
+            elif match_c:
+                num_str = match_c.group(1)
+                wp_id = f"CP{num_str}"
+                num_w_id = f"{num_str}C"
             else:
                 wp_id = rep_track_id.upper()
                 num_w_id = rep_track_id.upper()
