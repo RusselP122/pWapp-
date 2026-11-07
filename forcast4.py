@@ -175,9 +175,11 @@ gl.ylabel_style = {'size': 12, 'weight': 'bold'}
 gl.top_labels = False
 gl.right_labels = False
 
+wps_fontsize = 4  # West Philippine Sea font size (change here to adjust)
+
 ax.text(
-        118, 13, 'West Philippine\nSea', fontsize=4, color='navy', weight='bold',
-        transform=ccrs.PlateCarree(), ha='center', va='center', style='italic', alpha=0.5
+    118 - 180, 13, 'West Philippine\nSea', fontsize=wps_fontsize, color='navy', weight='bold',
+    transform=projection, ha='center', va='center', style='italic', alpha=0.5
 )
 ax.text(
     130 - 180, 20, 'Philippine\nSea', fontsize=9, color='navy', weight='bold',
@@ -620,7 +622,7 @@ for mode in ['standard', 'cluster']:
     gl.right_labels = False
     
     ax.text(
-        118 - 180, 13, 'West Philippine\nSea', fontsize=8, color='navy', weight='bold',
+        118 - 180, 13, 'West Philippine\nSea', fontsize=wps_fontsize, color='navy', weight='bold',
         transform=projection, ha='center', va='center', style='italic', alpha=0.5
     )
     ax.text(
