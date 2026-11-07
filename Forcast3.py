@@ -609,8 +609,8 @@ for mode in ['standard', 'cluster']:
     gl.right_labels = False
     
     ax.text(
-        118 - 180, 13, 'West Philippine\nSea', fontsize=5, color='navy', weight='bold',
-        transform=projection, ha='center', va='center', style='italic', alpha=0.5
+        118, 13, 'West Philippine\nSea', fontsize=4, color='navy', weight='bold',
+        transform=ccrs.PlateCarree(), ha='center', va='center', style='italic', alpha=0.5
     )
     ax.text(
         130 - 180, 20, 'Philippine\nSea', fontsize=9, color='navy', weight='bold',
