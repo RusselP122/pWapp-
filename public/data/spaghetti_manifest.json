@@ -3,40 +3,6 @@
     "storm_id": "WP31",
     "atcf_id": "31W",
     "init_date": "20261106",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "WP31_20261106T00Z",
-    "filename": "WP31_20261106_00Z_gdm_wnc_large.png",
-    "alt_filename": "WP31_20261106_00Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-06T08:09:23.128005+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261106",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261106T00Z",
-    "filename": "MONITORING_LPA01_20261106_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261106_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "timestamp": "2026-11-06T08:09:31.285661+00:00"
-  },
-  {
-    "storm_id": "WP31",
-    "atcf_id": "31W",
-    "init_date": "20261106",
-    "cycle": "00Z",
-    "model": "gdm_wncv3",
-    "unique_key": "WP31_20261106T00Z",
-    "filename": "WP31_20261106_00Z_gdm_wncv3.png",
-    "alt_filename": "WP31_20261106_00Z_gdm_wncv3.png",
-    "timestamp": "2026-11-06T22:54:36.752047+00:00"
-  },
-  {
-    "storm_id": "WP31",
-    "atcf_id": "31W",
-    "init_date": "20261106",
     "cycle": "06Z",
     "model": "gdm_wnc_large",
     "unique_key": "WP31_20261106T06Z",
@@ -304,5 +270,57 @@
     "filename": "WP31_20261107_18Z_gdm_wnc_large.png",
     "alt_filename": "WP31_20261107_18Z_gdm_wnc_large.png",
     "timestamp": "2026-11-08T05:08:55.957487+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261108",
+    "cycle": "00Z",
+    "model": "gdm_wncv3",
+    "unique_key": "CP04_20261108T00Z",
+    "filename": "CP04_20261108_00Z_gdm_wncv3.png",
+    "alt_filename": "CP04_20261108_00Z_gdm_wncv3.png",
+    "timestamp": "2026-11-08T08:04:25.252403+00:00"
+  },
+  {
+    "storm_id": "WP31",
+    "atcf_id": "31W",
+    "storm_name": "CEMPAKA",
+    "basin": "WP",
+    "init_date": "20261108",
+    "cycle": "00Z",
+    "model": "gdm_wncv3",
+    "unique_key": "WP31_20261108T00Z",
+    "filename": "WP31_20261108_00Z_gdm_wncv3.png",
+    "alt_filename": "WP31_20261108_00Z_gdm_wncv3.png",
+    "timestamp": "2026-11-08T08:04:27.138390+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261108",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "CP04_20261108T00Z",
+    "filename": "CP04_20261108_00Z_gdm_wnc_large.png",
+    "alt_filename": "CP04_20261108_00Z_gdm_wnc_large.png",
+    "timestamp": "2026-11-08T08:04:55.173988+00:00"
+  },
+  {
+    "storm_id": "WP31",
+    "atcf_id": "31W",
+    "storm_name": "CEMPAKA",
+    "basin": "WP",
+    "init_date": "20261108",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "WP31_20261108T00Z",
+    "filename": "WP31_20261108_00Z_gdm_wnc_large.png",
+    "alt_filename": "WP31_20261108_00Z_gdm_wnc_large.png",
+    "timestamp": "2026-11-08T08:05:09.007273+00:00"
   }
 ]
