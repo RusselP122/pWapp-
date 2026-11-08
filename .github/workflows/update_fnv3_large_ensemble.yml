@@ -3,7 +3,7 @@ name: Update FNV3 Large Ensemble Forecast Images
 on:
   schedule:
     # Runs at 00:05, 06:05, 12:05, and 18:05 UTC every day (5-minute offset to run sequentially after base forecast)
-    - cron: '5 0,6,12,18 * * *'
+    - cron: "5 0,6,12,18 * * *"
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
 
@@ -29,7 +29,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: "3.9"
 
       - name: Install dependencies
         run: |
@@ -84,12 +84,12 @@ jobs:
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git config merge.renames false
-          
+
           python scripts/obfuscate_csvs.py
-          
+
           # Stage all modifications and deletions of tracked files in public/data
           git add -u public/data/
-          
+
           # Add forecast PNGs and the proxied CSVs for browser use
           git add public/assets/fnv3_*.png 2>/dev/null || true
           git add public/assets/WP*.png 2>/dev/null || true
@@ -102,7 +102,7 @@ jobs:
           git add -f public/data/cycles_manifest.json || true
           git add -f public/data/spaghetti_manifest.json || true
           git add -f public/data/tc_storms_index.json || true
-          
+
           # Commit if there are changes
           if git diff --staged --quiet; then
             echo "No changes to commit"
