@@ -2379,6 +2379,11 @@ def plot_monitoring_tracks(
     plt.savefig(output_path, dpi=200, bbox_inches='tight', pad_inches=0.15, facecolor='#090d14', edgecolor='none')
     plt.close()
     print(f"Broadcast-grade under-monitoring plot saved to: {output_path}")
+    return {
+        'region_name': region_name,
+        'region_friendly': region_friendly,
+        'is_cpac': (has_cpac or region_name == "CENTRAL PACIFIC / DATELINE")
+    }
 
 def main():
     parser = argparse.ArgumentParser(description="Ensemble Under-Monitoring LPA / Invest Candidate Tracking System")
@@ -2545,7 +2550,7 @@ def main():
                 if current_init_dt < latest_plotted_init[out_file]:
                     continue
 
-            plot_monitoring_tracks(
+            res_meta = plot_monitoring_tracks(
                 monitoring_df, 
                 model, 
                 sg_id, 
@@ -2578,12 +2583,19 @@ def main():
                 except Exception:
                     manifest_data = []
 
+            reg_name = res_meta.get('region_name', '') if res_meta else ''
+            is_cpac = res_meta.get('is_cpac', False) if res_meta else False
+
             entry_exists = False
             for entry in manifest_data:
                 if entry.get('unique_key') == unique_key and entry.get('model') == model_clean:
                     entry['filename'] = primary_filename
                     entry['alt_filename'] = primary_filename
                     entry['is_monitoring'] = True
+                    if reg_name:
+                        entry['region'] = reg_name
+                    if is_cpac:
+                        entry['basin'] = 'CP'
                     entry['timestamp'] = datetime.now(timezone.utc).isoformat()
                     entry_exists = True
                     break
@@ -2598,6 +2610,8 @@ def main():
                     'filename': primary_filename,
                     'alt_filename': primary_filename,
                     'is_monitoring': True,
+                    'region': reg_name,
+                    'basin': 'CP' if is_cpac else 'WP',
                     'timestamp': datetime.now(timezone.utc).isoformat()
                 })
 

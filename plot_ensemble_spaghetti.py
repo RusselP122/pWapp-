@@ -2618,6 +2618,11 @@ def plot_model_tracks(
 
     print(f"Broadcast-grade spaghetti plot saved to: {output_path}")
     print(f"Stats: {plotted_members} tracks plotted out of {total_ensemble_members} members.")
+    return {
+        'storm_name': real_name.upper() if has_name else None,
+        'basin': 'CP' if (has_cpac or str(storm_group_id).upper().startswith('CP') or (real_id and real_id.endswith('C'))) else 'WP',
+        'display_title': storm_title_display
+    }
 
 def map_hdbscan_clusters_to_knack_storms(df, knack_storms, dist_threshold=4.0):
     """
@@ -3050,7 +3055,7 @@ def main():
                         atcf_pos = (s['lat'], s['lon'])
                         break
             
-            plot_model_tracks(
+            res_meta = plot_model_tracks(
                 wp_df, model, sg_id, out_file,
                 storm_name_override=args.storm_name,
                 color_by=args.color_by,
@@ -3073,10 +3078,16 @@ def main():
                     manifest_data = []
                     
             entry_exists = False
+            storm_resolved_name = res_meta.get('storm_name') if res_meta else None
+            basin_val = res_meta.get('basin') if res_meta else ('CP' if wp_id.startswith('CP') else 'WP')
+
             for entry in manifest_data:
                 if entry.get('unique_key') == unique_key and entry.get('model') == model_clean:
                     entry['filename'] = primary_filename
                     entry['alt_filename'] = primary_filename
+                    if storm_resolved_name:
+                        entry['storm_name'] = storm_resolved_name
+                    entry['basin'] = basin_val
                     entry['timestamp'] = datetime.now(timezone.utc).isoformat()
                     entry_exists = True
                     break
@@ -3084,6 +3095,8 @@ def main():
                 manifest_data.append({
                     'storm_id': wp_id,
                     'atcf_id': num_w_id,
+                    'storm_name': storm_resolved_name,
+                    'basin': basin_val,
                     'init_date': ymd,
                     'cycle': cycle_str,
                     'model': model_clean,

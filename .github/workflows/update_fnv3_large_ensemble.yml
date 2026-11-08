@@ -93,6 +93,7 @@ jobs:
           # Add forecast PNGs and the proxied CSVs for browser use
           git add public/assets/fnv3_*.png 2>/dev/null || true
           git add public/assets/WP*.png 2>/dev/null || true
+          git add public/assets/CP*.png 2>/dev/null || true
           git add public/assets/MONITORING_*.png 2>/dev/null || true
           git add -f public/data/fnv3_large_latest.dat || true
           git add -f public/data/fnv3_large_paired_latest.dat || true
@@ -100,6 +101,7 @@ jobs:
           git add -f public/data/fnv3_large_paired_*.dat || true
           git add -f public/data/cycles_manifest.json || true
           git add -f public/data/spaghetti_manifest.json || true
+          git add -f public/data/tc_storms_index.json || true
           
           # Commit if there are changes
           if git diff --staged --quiet; then

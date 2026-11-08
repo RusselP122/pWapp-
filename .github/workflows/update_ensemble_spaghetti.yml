@@ -38,6 +38,7 @@ jobs:
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           git add public/assets/*.png || true
           git add public/data/spaghetti_manifest.json || true
+          git add public/data/tc_storms_index.json || true
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else

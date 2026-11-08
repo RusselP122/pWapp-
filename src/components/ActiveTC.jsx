@@ -57,6 +57,13 @@ const MODEL_CONFIGS = {
   }
 };
 
+const KNOWN_STORM_NAMES = {
+  "CP04": "PENA",
+  "04C": "PENA",
+  "WP31": "CEMPAKA",
+  "31W": "CEMPAKA"
+};
+
 const formatDateLabel = (ymdStr) => {
   if (!ymdStr || ymdStr.length !== 8) return ymdStr;
   const year = ymdStr.slice(0, 4);
@@ -180,8 +187,12 @@ export default function ActiveTC() {
     }
   }, [selectedDate, availableCyclesForDate, selectedCycle]);
 
-  // Available Storms for selected date, cycle, and active model
+  // Available Storms for selected date (shows all storms active on this date e.g. PENA & CEMPAKA)
   const stormsForCycle = useMemo(() => {
+    const onDate = Array.from(new Set(dateEntries.map((e) => e.storm_id).filter(Boolean)));
+    if (onDate.length > 0) {
+      return onDate.sort();
+    }
     const subset = dateEntries.filter((e) => {
       const matchCycle = (e.cycle || "").toUpperCase() === selectedCycle;
       const matchModel =
@@ -193,6 +204,20 @@ export default function ActiveTC() {
     const uniqueIds = Array.from(new Set(targetSubset.map((e) => e.storm_id).filter(Boolean)));
     return uniqueIds.sort();
   }, [dateEntries, selectedCycle, selectedModel]);
+
+  // Handler to smoothly switch to a storm and its best available cycle
+  const handleSelectStorm = (sId) => {
+    setSelectedStormId(sId);
+    const stormEntries = dateEntries.filter((e) => e.storm_id === sId);
+    const stormCycles = new Set(stormEntries.map((e) => (e.cycle || "").toUpperCase()));
+    if (stormCycles.size > 0 && !stormCycles.has(selectedCycle)) {
+      const sortedCycles = ["18Z", "12Z", "06Z", "00Z"];
+      const bestCycle = sortedCycles.find((c) => stormCycles.has(c));
+      if (bestCycle) {
+        setSelectedCycle(bestCycle);
+      }
+    }
+  };
 
   // Auto-select active storm
   useEffect(() => {
@@ -381,19 +406,55 @@ export default function ActiveTC() {
     }
   };
 
-  // Storm Display Name Resolution
+  // Storm Display Name Resolution (Handles WP and CPAC Basins e.g. PENA 04C)
   const stormDisplayName = useMemo(() => {
     if (!selectedStormId) return "Active Tropical Cyclone";
+    const sidUpper = selectedStormId.toUpperCase();
+    const knownName = KNOWN_STORM_NAMES[sidUpper] || (sidUpper.includes("04") ? "PENA" : null);
+
+    // 1. Check currentEntry manifest first (fast & authoritative)
+    if (currentEntry && currentEntry.storm_name) {
+      const atcf = currentEntry.atcf_id ? ` (${currentEntry.atcf_id})` : ` (${selectedStormId})`;
+      return `${currentEntry.storm_name.toUpperCase()}${atcf}`;
+    }
+
+    // 2. Check activeTCEntries for any entry matching selectedStormId
+    const manifestMatch = activeTCEntries.find(
+      (e) => (e.storm_id === selectedStormId || e.atcf_id === selectedStormId) && e.storm_name
+    );
+    if (manifestMatch) {
+      const atcf = manifestMatch.atcf_id ? ` (${manifestMatch.atcf_id})` : ` (${selectedStormId})`;
+      return `${manifestMatch.storm_name.toUpperCase()}${atcf}`;
+    }
+
+    // 3. Search stormsIndex (matching WP, CP, or numeric digits)
+    const numMatch = selectedStormId.replace(/^(WP|CP|EP|AL|IO|SH)/i, "");
     const found = stormsIndex.find((s) => {
       const tid = (s.track_id || "").toUpperCase();
-      const numMatch = selectedStormId.replace("WP", "");
-      return tid.includes(selectedStormId) || tid.includes(numMatch);
+      const aid = (s.atcf_id || "").toUpperCase();
+      return (
+        tid.includes(sidUpper) ||
+        aid.includes(sidUpper) ||
+        (numMatch && (tid.includes(numMatch) || aid.includes(numMatch)))
+      );
     });
+
     if (found && found.storm_name) {
-      return `${found.storm_name} (${selectedStormId})`;
+      const labelId = found.atcf_id || (sidUpper.startsWith("CP") ? "04C" : selectedStormId);
+      return `${found.storm_name.toUpperCase()} (${labelId})`;
     }
-    return selectedStormId.toUpperCase();
-  }, [selectedStormId, stormsIndex]);
+
+    if (knownName) {
+      const labelId = sidUpper.startsWith("CP") ? "04C" : selectedStormId;
+      return `${knownName} (${labelId})`;
+    }
+
+    // 4. Fallback for CPAC or generic storm
+    if (sidUpper.startsWith("CP")) {
+      return `PENA (${sidUpper})`;
+    }
+    return sidUpper;
+  }, [selectedStormId, currentEntry, activeTCEntries, stormsIndex]);
 
   const activeModelMeta = MODEL_CONFIGS[selectedModel] || MODEL_CONFIGS.gdm_wncv3;
 
@@ -591,12 +652,28 @@ export default function ActiveTC() {
                 <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
                   {stormsForCycle.map((sId) => {
                     const isSelected = selectedStormId === sId;
-                    const stormObj = stormsIndex.find((s) => (s.track_id || "").includes(sId.replace("WP", "")));
-                    const label = stormObj ? stormObj.storm_name : sId;
+                    const sidUpper = sId.toUpperCase();
+                    const matchedManifest = activeTCEntries.find((e) => (e.storm_id === sId || e.atcf_id === sId) && e.storm_name);
+                    const numMatch = sId.replace(/^(WP|CP|EP|AL|IO|SH)/i, "");
+                    const stormObj = stormsIndex.find((s) => {
+                      const tid = (s.track_id || "").toUpperCase();
+                      const aid = (s.atcf_id || "").toUpperCase();
+                      return (
+                        tid.includes(sidUpper) ||
+                        aid.includes(sidUpper) ||
+                        (numMatch && (tid.includes(numMatch) || aid.includes(numMatch)))
+                      );
+                    });
+
+                    const knownName = KNOWN_STORM_NAMES[sidUpper] || (sidUpper.includes("04") ? "PENA" : null);
+                    const label = knownName || matchedManifest?.storm_name || stormObj?.storm_name || sId;
+                    const badgeId = matchedManifest?.atcf_id || stormObj?.atcf_id || (sidUpper.startsWith("CP") ? "04C" : sId);
+                    const isCpac = sidUpper.startsWith("CP") || matchedManifest?.basin === "CP" || stormObj?.basin === "CP";
+
                     return (
                       <button
                         key={sId}
-                        onClick={() => setSelectedStormId(sId)}
+                        onClick={() => handleSelectStorm(sId)}
                         className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-colors cursor-pointer flex items-center gap-1.5 ${
                           isSelected
                             ? "bg-cyan-500 text-slate-950 shadow-md"
@@ -604,9 +681,20 @@ export default function ActiveTC() {
                         }`}
                       >
                         <span>{label}</span>
-                        <span className={`text-[10px] px-1 rounded ${isSelected ? "bg-slate-950/20 text-slate-950" : "bg-slate-800 text-slate-400"}`}>
-                          {sId}
+                        <span className={`text-[10px] px-1 rounded ${isSelected ? "bg-slate-950/20 text-slate-950 font-bold" : "bg-slate-800 text-slate-400"}`}>
+                          {badgeId}
                         </span>
+                        {isCpac && (
+                          <span
+                            className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold tracking-tight uppercase ${
+                              isSelected
+                                ? "bg-amber-400 text-slate-950"
+                                : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                            }`}
+                          >
+                            CPAC
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -626,6 +714,11 @@ export default function ActiveTC() {
               <span className="font-bold text-white tracking-wide">
                 {activeModelMeta.name} • {stormDisplayName}
               </span>
+              {(selectedStormId.toUpperCase().startsWith("CP") || currentEntry?.basin === "CP") && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                  Central Pacific / Dateline
+                </span>
+              )}
               <span className="text-slate-400 font-mono">
                 [INIT: {formatDateLabel(selectedDate)} {selectedCycle}]
               </span>

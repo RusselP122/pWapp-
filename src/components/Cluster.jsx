@@ -71,13 +71,20 @@ const formatDateLabel = (ymdStr) => {
   return `${monthNames[month]} ${day}, ${year}`;
 };
 
-const formatClusterLabel = (dId, index = 0) => {
-  if (!dId) return `Cluster ${String(index + 1).padStart(2, "0")}`;
-  const match = dId.match(/\d+/);
-  if (match) {
-    return `Cluster ${match[0].padStart(2, "0")}`;
+const formatClusterLabel = (dId, index = 0, entry = null) => {
+  let baseNum = String(index + 1).padStart(2, "0");
+  if (dId) {
+    const match = dId.match(/\d+/);
+    if (match) {
+      baseNum = match[0].padStart(2, "0");
+    }
   }
-  return `Cluster ${String(index + 1).padStart(2, "0")}`;
+
+  if (entry && entry.storm_name && entry.storm_name !== "INVEST") {
+    return `Cluster ${baseNum} • ${entry.storm_name}`;
+  }
+
+  return `Cluster ${baseNum}`;
 };
 
 export default function Cluster() {
@@ -403,8 +410,15 @@ export default function Cluster() {
 
   const disturbanceDisplayName = useMemo(() => {
     if (!selectedDisturbance) return "Cluster 01";
-    return formatClusterLabel(selectedDisturbance);
-  }, [selectedDisturbance]);
+    const base = formatClusterLabel(selectedDisturbance, 0, currentEntry);
+    if (currentEntry?.region) {
+      return `${base} (${currentEntry.region})`;
+    }
+    if (selectedDisturbance.toUpperCase().includes("CP") || currentEntry?.basin === "CP") {
+      return `${base} (Central Pacific / Dateline)`;
+    }
+    return base;
+  }, [selectedDisturbance, currentEntry]);
 
   const activeModelMeta = MODEL_CONFIGS[selectedModel] || MODEL_CONFIGS.gdm_wncv3;
 
@@ -603,18 +617,36 @@ export default function Cluster() {
                 <div className="flex items-center gap-1.5 bg-slate-950/80 p-1 rounded-xl border border-slate-800">
                   {disturbancesForCycle.map((dId, idx) => {
                     const isSelected = selectedDisturbance === dId;
-                    const label = formatClusterLabel(dId, idx);
+                    const entry = dateEntries.find(
+                      (e) => (e.cycle || "").toUpperCase() === selectedCycle && e.storm_id === dId
+                    );
+                    const label = formatClusterLabel(dId, idx, entry);
+                    const isCpac =
+                      (entry && (entry.basin === "CP" || (entry.region && entry.region.includes("CENTRAL PACIFIC")))) ||
+                      dId.toUpperCase().includes("CP");
+
                     return (
                       <button
                         key={dId}
                         onClick={() => setSelectedDisturbance(dId)}
-                        className={`px-3 py-1 rounded-lg text-xs font-bold font-mono transition-colors cursor-pointer ${
+                        className={`px-3 py-1.5 rounded-lg text-xs font-bold font-mono transition-colors cursor-pointer flex items-center gap-1.5 ${
                           isSelected
                             ? "bg-cyan-500 text-slate-950 shadow-sm"
                             : "text-slate-400 hover:text-white hover:bg-slate-900"
                         }`}
                       >
-                        {label}
+                        <span>{label}</span>
+                        {isCpac && (
+                          <span
+                            className={`text-[9px] px-1.5 py-0.2 rounded font-mono font-bold tracking-tight uppercase ${
+                              isSelected
+                                ? "bg-amber-400 text-slate-950"
+                                : "bg-amber-500/20 text-amber-300 border border-amber-500/40"
+                            }`}
+                          >
+                            CPAC
+                          </span>
+                        )}
                       </button>
                     );
                   })}
@@ -634,6 +666,11 @@ export default function Cluster() {
               <span className="font-bold text-white tracking-wide">
                 {activeModelMeta.name} • {disturbanceDisplayName}
               </span>
+              {currentEntry?.region && (
+                <span className="px-2 py-0.5 rounded-full text-[10px] font-mono font-bold bg-amber-500/20 text-amber-300 border border-amber-500/40 uppercase">
+                  {currentEntry.region}
+                </span>
+              )}
               <span className="text-slate-400 font-mono">
                 [INIT: {formatDateLabel(selectedDate)} {selectedCycle}]
               </span>

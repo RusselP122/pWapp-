@@ -135,6 +135,60 @@
   {
     "storm_id": "CP04",
     "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261107",
+    "cycle": "00Z",
+    "model": "gdm_wncv3",
+    "unique_key": "CP04_20261107T00Z",
+    "filename": "CP04_20261107_00Z_gdm_wncv3.png",
+    "alt_filename": "CP04_20261107_00Z_gdm_wncv3.png",
+    "timestamp": "2026-11-07T12:44:20.000000+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261107",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "CP04_20261107T00Z",
+    "filename": "CP04_20261107_00Z_gdm_wnc_large.png",
+    "alt_filename": "CP04_20261107_00Z_gdm_wnc_large.png",
+    "timestamp": "2026-11-07T12:44:22.000000+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261107",
+    "cycle": "00Z",
+    "model": "gdm_wncv3",
+    "unique_key": "CP04_20261107T00Z",
+    "filename": "CP04_20261107_00Z_gdm_wncv3.png",
+    "alt_filename": "CP04_20261107_00Z_gdm_wncv3.png",
+    "timestamp": "2026-11-07T12:44:20.000000+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261107",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "CP04_20261107T00Z",
+    "filename": "CP04_20261107_00Z_gdm_wnc_large.png",
+    "alt_filename": "CP04_20261107_00Z_gdm_wnc_large.png",
+    "timestamp": "2026-11-07T12:44:22.000000+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
     "init_date": "20261107",
     "cycle": "06Z",
     "model": "gdm_wncv3",
@@ -157,6 +211,8 @@
   {
     "storm_id": "CP04",
     "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
     "init_date": "20261107",
     "cycle": "06Z",
     "model": "gdm_wnc_large",
@@ -168,6 +224,8 @@
   {
     "storm_id": "WP31",
     "atcf_id": "31W",
+    "storm_name": "TC 31W",
+    "basin": "WP",
     "init_date": "20261107",
     "cycle": "06Z",
     "model": "gdm_wnc_large",
@@ -179,45 +237,53 @@
   {
     "storm_id": "CP04",
     "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
     "init_date": "20261107",
     "cycle": "12Z",
     "model": "gdm_wncv3",
     "unique_key": "CP04_20261107T12Z",
     "filename": "CP04_20261107_12Z_gdm_wncv3.png",
     "alt_filename": "CP04_20261107_12Z_gdm_wncv3.png",
-    "timestamp": "2026-11-07T21:39:43.450535+00:00"
+    "timestamp": "2026-11-08T00:36:44.682300+00:00"
   },
   {
     "storm_id": "WP31",
     "atcf_id": "31W",
+    "storm_name": "CEMPAKA",
+    "basin": "WP",
     "init_date": "20261107",
     "cycle": "12Z",
     "model": "gdm_wncv3",
     "unique_key": "WP31_20261107T12Z",
     "filename": "WP31_20261107_12Z_gdm_wncv3.png",
     "alt_filename": "WP31_20261107_12Z_gdm_wncv3.png",
-    "timestamp": "2026-11-07T21:39:45.354694+00:00"
+    "timestamp": "2026-11-08T00:36:48.938109+00:00"
   },
   {
     "storm_id": "CP04",
     "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
     "init_date": "20261107",
     "cycle": "12Z",
     "model": "gdm_wnc_large",
     "unique_key": "CP04_20261107T12Z",
     "filename": "CP04_20261107_12Z_gdm_wnc_large.png",
     "alt_filename": "CP04_20261107_12Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-07T21:40:16.428195+00:00"
+    "timestamp": "2026-11-08T00:38:23.571437+00:00"
   },
   {
     "storm_id": "WP31",
     "atcf_id": "31W",
+    "storm_name": "CEMPAKA",
+    "basin": "WP",
     "init_date": "20261107",
     "cycle": "12Z",
     "model": "gdm_wnc_large",
     "unique_key": "WP31_20261107T12Z",
     "filename": "WP31_20261107_12Z_gdm_wnc_large.png",
     "alt_filename": "WP31_20261107_12Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-07T21:40:31.363097+00:00"
+    "timestamp": "2026-11-08T00:39:05.100333+00:00"
   }
 ]
