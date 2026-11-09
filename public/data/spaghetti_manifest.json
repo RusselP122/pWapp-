@@ -2,17 +2,6 @@
   {
     "storm_id": "WP31",
     "atcf_id": "31W",
-    "init_date": "20261106",
-    "cycle": "18Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "WP31_20261106T18Z",
-    "filename": "WP31_20261106_18Z_gdm_wnc_large.png",
-    "alt_filename": "WP31_20261106_18Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-07T05:14:31.838188+00:00"
-  },
-  {
-    "storm_id": "WP31",
-    "atcf_id": "31W",
     "init_date": "20261107",
     "cycle": "00Z",
     "model": "gdm_wncv3",
@@ -367,5 +356,57 @@
     "filename": "WP31_20261108_12Z_gdm_wnc_large.png",
     "alt_filename": "WP31_20261108_12Z_gdm_wnc_large.png",
     "timestamp": "2026-11-08T21:56:00.405420+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261108",
+    "cycle": "18Z",
+    "model": "gdm_wncv3",
+    "unique_key": "CP04_20261108T18Z",
+    "filename": "CP04_20261108_18Z_gdm_wncv3.png",
+    "alt_filename": "CP04_20261108_18Z_gdm_wncv3.png",
+    "timestamp": "2026-11-09T02:13:03.048907+00:00"
+  },
+  {
+    "storm_id": "WP31",
+    "atcf_id": "31W",
+    "storm_name": "CEMPAKA",
+    "basin": "WP",
+    "init_date": "20261108",
+    "cycle": "18Z",
+    "model": "gdm_wncv3",
+    "unique_key": "WP31_20261108T18Z",
+    "filename": "WP31_20261108_18Z_gdm_wncv3.png",
+    "alt_filename": "WP31_20261108_18Z_gdm_wncv3.png",
+    "timestamp": "2026-11-09T02:13:05.528536+00:00"
+  },
+  {
+    "storm_id": "CP04",
+    "atcf_id": "04C",
+    "storm_name": "PENA",
+    "basin": "CP",
+    "init_date": "20261108",
+    "cycle": "18Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "CP04_20261108T18Z",
+    "filename": "CP04_20261108_18Z_gdm_wnc_large.png",
+    "alt_filename": "CP04_20261108_18Z_gdm_wnc_large.png",
+    "timestamp": "2026-11-09T02:13:40.627036+00:00"
+  },
+  {
+    "storm_id": "WP31",
+    "atcf_id": "31W",
+    "storm_name": "CEMPAKA",
+    "basin": "WP",
+    "init_date": "20261108",
+    "cycle": "18Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "WP31_20261108T18Z",
+    "filename": "WP31_20261108_18Z_gdm_wnc_large.png",
+    "alt_filename": "WP31_20261108_18Z_gdm_wnc_large.png",
+    "timestamp": "2026-11-09T02:14:00.091321+00:00"
   }
 ]
