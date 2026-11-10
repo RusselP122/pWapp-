@@ -376,7 +376,7 @@
     "unique_key": "CP04_20261110T06Z",
     "filename": "CP04_20261110_06Z_gdm_wncv3.png",
     "alt_filename": "CP04_20261110_06Z_gdm_wncv3.png",
-    "timestamp": "2026-11-10T14:22:31.876738+00:00"
+    "timestamp": "2026-11-10T14:37:05.154467+00:00"
   },
   {
     "storm_id": "WP31",
@@ -389,7 +389,7 @@
     "unique_key": "WP31_20261110T06Z",
     "filename": "WP31_20261110_06Z_gdm_wncv3.png",
     "alt_filename": "WP31_20261110_06Z_gdm_wncv3.png",
-    "timestamp": "2026-11-10T14:22:33.888937+00:00"
+    "timestamp": "2026-11-10T14:37:06.798028+00:00"
   },
   {
     "storm_id": "CP04",
@@ -402,7 +402,7 @@
     "unique_key": "CP04_20261110T06Z",
     "filename": "CP04_20261110_06Z_gdm_wnc_large.png",
     "alt_filename": "CP04_20261110_06Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-10T14:23:00.419533+00:00"
+    "timestamp": "2026-11-10T14:37:26.188858+00:00"
   },
   {
     "storm_id": "WP31",
@@ -415,7 +415,7 @@
     "unique_key": "WP31_20261110T06Z",
     "filename": "WP31_20261110_06Z_gdm_wnc_large.png",
     "alt_filename": "WP31_20261110_06Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-10T14:23:16.704249+00:00"
+    "timestamp": "2026-11-10T14:37:38.302449+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -429,6 +429,6 @@
     "is_monitoring": true,
     "region": "WEST OF PALAU",
     "basin": "WP",
-    "timestamp": "2026-11-10T14:23:23.216078+00:00"
+    "timestamp": "2026-11-10T14:37:43.946598+00:00"
   }
 ]
