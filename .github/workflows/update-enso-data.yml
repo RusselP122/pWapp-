@@ -43,7 +43,7 @@ jobs:
         if: steps.check_date.outputs.run_scraper == 'true'
         uses: actions/setup-python@v5
         with:
-          python-version: '3.9'
+          python-version: '3.11'
 
       - name: Install Python dependencies
         if: steps.check_date.outputs.run_scraper == 'true'
