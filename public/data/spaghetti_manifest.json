@@ -364,7 +364,7 @@
     "unique_key": "CP04_20261112T06Z",
     "filename": "CP04_20261112_06Z_gdm_wncv3.png",
     "alt_filename": "CP04_20261112_06Z_gdm_wncv3.png",
-    "timestamp": "2026-11-12T13:48:23.361057+00:00"
+    "timestamp": "2026-11-12T14:52:34.072012+00:00"
   },
   {
     "storm_id": "CP04",
@@ -377,7 +377,7 @@
     "unique_key": "CP04_20261112T06Z",
     "filename": "CP04_20261112_06Z_gdm_wnc_large.png",
     "alt_filename": "CP04_20261112_06Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-12T13:48:30.073802+00:00"
+    "timestamp": "2026-11-12T14:52:45.594689+00:00"
   },
   {
     "storm_id": "MONITORING_LPA02",
@@ -391,7 +391,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-12T13:48:34.214389+00:00"
+    "timestamp": "2026-11-12T14:52:51.448599+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -405,6 +405,6 @@
     "is_monitoring": true,
     "region": "WEST OF PALAU",
     "basin": "WP",
-    "timestamp": "2026-11-12T13:48:35.499136+00:00"
+    "timestamp": "2026-11-12T14:52:53.528204+00:00"
   }
 ]
