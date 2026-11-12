@@ -366,7 +366,7 @@
     "unique_key": "CP04_20261112T12Z",
     "filename": "CP04_20261112_12Z_gdm_wncv3.png",
     "alt_filename": "CP04_20261112_12Z_gdm_wncv3.png",
-    "timestamp": "2026-11-12T21:33:25.616264+00:00"
+    "timestamp": "2026-11-12T23:22:17.889700+00:00"
   },
   {
     "storm_id": "CP04",
@@ -379,7 +379,7 @@
     "unique_key": "CP04_20261112T12Z",
     "filename": "CP04_20261112_12Z_gdm_wnc_large.png",
     "alt_filename": "CP04_20261112_12Z_gdm_wnc_large.png",
-    "timestamp": "2026-11-12T21:33:35.838883+00:00"
+    "timestamp": "2026-11-12T23:22:27.954747+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -393,7 +393,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-12T21:33:39.645951+00:00"
+    "timestamp": "2026-11-12T23:22:31.529001+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -407,6 +407,6 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-12T21:33:43.062988+00:00"
+    "timestamp": "2026-11-12T23:22:34.963319+00:00"
   }
 ]
