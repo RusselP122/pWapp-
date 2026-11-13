@@ -112,6 +112,25 @@ def fetch_knack_active_storms():
         print(f"Warning: Failed to fetch from Knack API: {e}")
         return []
 
+def load_atcf_storms_index():
+    """
+    Loads active and historical storms from local tc_storms_index.json.
+    """
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    paths = [
+        os.path.join(script_dir, 'public', 'data', 'tc_storms_index.json'),
+        os.path.join(os.getcwd(), 'public', 'data', 'tc_storms_index.json'),
+        os.path.join('public', 'data', 'tc_storms_index.json')
+    ]
+    for p in paths:
+        if os.path.exists(p):
+            try:
+                with open(p, 'r', encoding='utf-8') as f:
+                    return json.load(f)
+            except Exception as e:
+                print(f"Warning: Failed to load {p}: {e}")
+    return []
+
 _ph_municipalities_tree = None
 _ph_geoms = None
 _ph_props = None
@@ -845,13 +864,15 @@ def normalize_dataframe(df):
             
     df = df.rename(columns=rename_dict)
     
-    # Extract track_id if not present
+    # Extract track_id if not present, and ensure it is always string type
     if 'track_id' not in df.columns:
         if 'basin' in df.columns and 'cyclone_number' in df.columns:
             # e.g., WP09
             df['track_id'] = df['basin'].astype(str) + df['cyclone_number'].astype(str).str.zfill(2)
         else:
             df['track_id'] = 'STORM'
+    else:
+        df['track_id'] = df['track_id'].astype(str)
             
     # Calculate lead_time_hours from lead_time if not present
     if 'lead_time_hours' not in df.columns and 'lead_time' in df.columns:
@@ -1091,6 +1112,9 @@ def cluster_genesis_locations(df, dist_threshold=6.0):
     df['storm_group'] = 'UNKNOWN'
     df['storm_group_name'] = 'UNKNOWN'
     df['rep_track_id'] = 'UNKNOWN'
+    df['storm_group'] = df['storm_group'].astype(str)
+    df['storm_group_name'] = df['storm_group_name'].astype(str)
+    df['rep_track_id'] = df['rep_track_id'].astype(str)
     
     # Process each unique init_time separately
     for init_val in df['init_time'].unique():
@@ -1229,9 +1253,9 @@ def cluster_genesis_locations(df, dist_threshold=6.0):
             group_name = get_storm_display_name(best_tid)
             
             for t in cl_tracks:
-                df.loc[t['points_index'], 'storm_group'] = group_id
-                df.loc[t['points_index'], 'storm_group_name'] = group_name
-                df.loc[t['points_index'], 'rep_track_id'] = best_tid
+                df.loc[t['points_index'], 'storm_group'] = str(group_id)
+                df.loc[t['points_index'], 'storm_group_name'] = str(group_name)
+                df.loc[t['points_index'], 'rep_track_id'] = str(best_tid)
                 
     return df
 
@@ -2760,9 +2784,9 @@ def map_hdbscan_clusters_to_knack_storms(df, knack_storms, dist_threshold=4.0):
     # Apply the mappings to the dataframe
     for orig_group_id, mapping in mapped_groups.items():
         mask = df['storm_group'] == orig_group_id
-        df.loc[mask, 'storm_group'] = mapping['storm_group']
-        df.loc[mask, 'storm_group_name'] = mapping['storm_group_name']
-        df.loc[mask, 'rep_track_id'] = mapping['rep_track_id']
+        df.loc[mask, 'storm_group'] = str(mapping['storm_group'])
+        df.loc[mask, 'storm_group_name'] = str(mapping['storm_group_name'])
+        df.loc[mask, 'rep_track_id'] = str(mapping['rep_track_id'])
         print(f"Mapped HDBSCAN cluster {orig_group_id} to Knack storm {mapping['atcf_id']} (dist: {mapping['dist']:.2f} deg, target lead: {mapping['lead_time']:.1f}h)")
         
     return df, has_mapped
@@ -2783,6 +2807,9 @@ def assign_tracks_to_knack_storms(df, knack_storms):
     df['storm_group'] = 'UNKNOWN'
     df['storm_group_name'] = 'UNKNOWN'
     df['rep_track_id'] = 'UNKNOWN'
+    df['storm_group'] = df['storm_group'].astype(str)
+    df['storm_group_name'] = df['storm_group_name'].astype(str)
+    df['rep_track_id'] = df['rep_track_id'].astype(str)
 
     storm_info = {}
     for s in knack_storms:
@@ -2831,9 +2858,9 @@ def assign_tracks_to_knack_storms(df, knack_storms):
         if best_s:
             s_data = storm_info[best_s]
             t_idx = t_df.index
-            df.loc[t_idx, 'storm_group'] = f"knack_{best_s}"
-            df.loc[t_idx, 'storm_group_name'] = s_data['display_name']
-            df.loc[t_idx, 'rep_track_id'] = best_s
+            df.loc[t_idx, 'storm_group'] = str(f"knack_{best_s}")
+            df.loc[t_idx, 'storm_group_name'] = str(s_data['display_name'])
+            df.loc[t_idx, 'rep_track_id'] = str(best_s)
             has_mapped = True
 
     if has_mapped:
@@ -2891,6 +2918,32 @@ def main():
             s for s in knack_storms 
             if ((100.0 <= s['lon'] <= 180.0) or (-180.0 <= s['lon'] <= -140.0) or (180.0 <= s['lon'] <= 220.0)) and (0.0 <= s['lat'] <= 50.0)
         ]
+    if not knack_storms:
+        print("Knack API returned 0 active storms; falling back to local active storms from tc_storms_index.json...")
+        idx_storms = load_atcf_storms_index()
+        for s in idx_storms:
+            if s.get('active'):
+                tid = str(s.get('track_id', '')).upper()
+                aid = str(s.get('atcf_id', '')).upper()
+                if not aid:
+                    m = re.search(r'([A-Z]+)?(\d{2})', tid)
+                    if m:
+                        aid = f"{m.group(2)}W"
+                lat = float(s.get('latest_lat', 15.0))
+                lon = float(s.get('latest_lon', 130.0))
+                basin = s.get('basin', 'CP' if 'CP' in tid or 'C' in aid else 'WP')
+                knack_storms.append({
+                    'atcf_id': aid,
+                    'name': s.get('storm_name', 'TROPICAL SYSTEM'),
+                    'lat': lat,
+                    'lon': lon,
+                    'basin': basin,
+                    'init_time': s.get('last_updated', ''),
+                    'winds': None,
+                    'pressure': None
+                })
+        if knack_storms:
+            print(f"Loaded {len(knack_storms)} active storms from local tc_storms_index.json.")
 
     print(f"Processing files: {input_files}")
     
