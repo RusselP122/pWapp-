@@ -419,7 +419,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:29.078759+00:00"
+    "timestamp": "2026-11-13T14:11:54.126383+00:00"
   },
   {
     "storm_id": "MONITORING_LPA02",
@@ -433,7 +433,7 @@
     "is_monitoring": true,
     "region": "SULU SEA",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:37.677141+00:00"
+    "timestamp": "2026-11-13T14:12:02.801863+00:00"
   },
   {
     "storm_id": "MONITORING_LPA05",
@@ -447,7 +447,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:40.169366+00:00"
+    "timestamp": "2026-11-13T14:12:05.277058+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -461,7 +461,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:45.405268+00:00"
+    "timestamp": "2026-11-13T14:12:10.440997+00:00"
   },
   {
     "storm_id": "MONITORING_LPA03",
@@ -475,7 +475,7 @@
     "is_monitoring": true,
     "region": "WEST OF PALAU",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:49.799106+00:00"
+    "timestamp": "2026-11-13T14:12:14.742869+00:00"
   },
   {
     "storm_id": "MONITORING_LPA08",
@@ -489,7 +489,7 @@
     "is_monitoring": true,
     "region": "MARSHALL ISLANDS",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:51.172932+00:00"
+    "timestamp": "2026-11-13T14:12:16.081270+00:00"
   },
   {
     "storm_id": "MONITORING_LPA06",
@@ -503,7 +503,7 @@
     "is_monitoring": true,
     "region": "CAROLINE ISLANDS",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:53.711095+00:00"
+    "timestamp": "2026-11-13T14:12:18.598228+00:00"
   },
   {
     "storm_id": "MONITORING_LPA04",
@@ -517,7 +517,7 @@
     "is_monitoring": true,
     "region": "WEST OF PALAU",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:56.387550+00:00"
+    "timestamp": "2026-11-13T14:12:21.447005+00:00"
   },
   {
     "storm_id": "MONITORING_LPA09",
@@ -531,7 +531,7 @@
     "is_monitoring": true,
     "region": "EAST OF PALAU",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:57.850125+00:00"
+    "timestamp": "2026-11-13T14:12:22.872607+00:00"
   },
   {
     "storm_id": "MONITORING_LPA07",
@@ -545,6 +545,6 @@
     "is_monitoring": true,
     "region": "SOUTH CHINA SEA",
     "basin": "WP",
-    "timestamp": "2026-11-13T13:47:59.324537+00:00"
+    "timestamp": "2026-11-13T14:12:24.320572+00:00"
   }
 ]
