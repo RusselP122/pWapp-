@@ -77,12 +77,15 @@ jobs:
         run: rm -f "$GITHUB_WORKSPACE/gcp-key.json"
 
       - name: Upload WeatherNext maps to Cloudflare R2
-        if: secrets.R2_ACCESS_KEY_ID != ''
         env:
           AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
           AWS_DEFAULT_REGION: auto
         run: |
+          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
+            echo "R2_ACCESS_KEY_ID not set, skipping R2 upload."
+            exit 0
+          fi
           aws s3 sync public/images/precip_mslp_weathernext/ s3://images/images/precip_mslp_weathernext/ \
             --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
           aws s3 sync public/images/precip_mslp_weathernext_overlay/ s3://images/images/precip_mslp_weathernext_overlay/ \
