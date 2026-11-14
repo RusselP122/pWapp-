@@ -52,3 +52,23 @@ himwari_philippines_sandwhich.py
 generate_cfsv2_enso_graphic.py
 dry.py
 top_lowest_temperature.py
+
+# Media and forecast image outputs (hosted on Cloudflare R2)
+public/assets/*.png
+public/assets/risk_maps/*.png
+public/images/wind/*.png
+public/images/wind/*.gif
+public/images/wind_gfs/*.png
+public/images/wind_aigfs/*.png
+public/images/wind_weathernext/*.png
+public/images/wind_weathernext_overlay/*.png
+public/images/rainfall/*.png
+public/images/rainfall/*.gif
+public/images/rainfall_aigfs/*.png
+public/images/rainfall_weathernext/*.png
+public/images/precip_mslp/*.png
+public/images/precip_mslp_aifs/*.png
+public/images/precip_mslp_aigfs/*.png
+public/images/precip_mslp_weathernext/*.png
+public/images/precip_mslp_weathernext_overlay/*.png
+public/images/ai_precip_outlook/*.png

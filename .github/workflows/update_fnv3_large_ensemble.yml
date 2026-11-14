@@ -79,6 +79,17 @@ jobs:
           python plot_ensemble_spaghetti.py
           python plot_monitoring_spaghetti.py
 
+      - name: Upload forecast images to Cloudflare R2
+        if: secrets.R2_ACCESS_KEY_ID != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 sync public/assets/ s3://images/assets/ \
+            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com \
+            --exclude "*" --include "fnv3_*.png" --include "WP*.png" --include "CP*.png" --include "MONITORING_*.png"
+
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
@@ -90,11 +101,7 @@ jobs:
           # Stage all modifications and deletions of tracked files in public/data
           git add -u public/data/
 
-          # Add forecast PNGs and the proxied CSVs for browser use
-          git add public/assets/fnv3_*.png 2>/dev/null || true
-          git add public/assets/WP*.png 2>/dev/null || true
-          git add public/assets/CP*.png 2>/dev/null || true
-          git add public/assets/MONITORING_*.png 2>/dev/null || true
+          # Add only data and manifest files (images are hosted on Cloudflare R2)
           git add -f public/data/fnv3_large_latest.dat || true
           git add -f public/data/fnv3_large_paired_latest.dat || true
           git add -f public/data/fnv3_large_*.dat || true

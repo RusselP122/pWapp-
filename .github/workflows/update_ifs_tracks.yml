@@ -44,18 +44,28 @@ jobs:
         run: |
           python plot_ifs_tracks.py
 
+      - name: Upload images to Cloudflare R2
+        if: secrets.R2_ACCESS_KEY_ID != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 sync public/assets/ s3://images/assets/ \
+            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com \
+            --exclude "*" --include "ifs_tropical_cyclone_*"
+
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
           python scripts/obfuscate_csvs.py
           git add -f public/data/ifs_tc_latest.dat || true
-          git add public/assets/ifs_tropical_cyclone_* || true
           # Only commit if there are changes
           if git diff --staged --quiet; then
             echo "No changes to commit"
           else
-            git commit -m "Auto-update ECMWF IFS TC Tracks and Images [skip ci]"
+            git commit -m "Auto-update ECMWF IFS TC Tracks and data [skip ci]"
             git pull --rebase origin main
             git push
           fi

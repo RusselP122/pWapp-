@@ -1,12 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Heart, Coffee, QrCode, Copy, Check, Server, Globe, Zap, ExternalLink, ShieldCheck, Sparkles, Download, X } from "lucide-react";
-
-// Helper to resolve asset URLs correctly across different base paths
-const getAssetUrl = (path) => {
-  const base = import.meta.env.BASE_URL || "/";
-  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
-  return `${base}${cleanPath}`;
-};
+import { getAssetUrl } from "../utils/cdn";
 
 const SupportUs = () => {
   const [copiedBank, setCopiedBank] = useState(false);

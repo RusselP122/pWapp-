@@ -88,12 +88,7 @@ const LOCAL_CSV = {
     aigefs: "/data/aigefs_tc_latest.dat",
 };
 
-// Helper to resolve asset URLs relative to the base path in both local development and deployed production (subfolder) environments
-const getAssetUrl = (path) => {
-    const base = import.meta.env.BASE_URL || "/";
-    const cleanPath = path.startsWith("/") ? path.slice(1) : path;
-    return `${base}${cleanPath}`;
-};
+import { getAssetUrl } from "../utils/cdn";
 
 // ── Base64 + XOR Decryptor ──────────────────────────────────────────────
 function decodeObfuscatedData(base64Str, key = 0xAA) {

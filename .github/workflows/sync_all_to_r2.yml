@@ -1,0 +1,27 @@
+name: Sync All Images to Cloudflare R2
+
+on:
+  workflow_dispatch: # Allows manual trigger from GitHub Actions UI
+
+jobs:
+  sync-to-r2:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Sync public/assets and public/images to Cloudflare R2
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          echo "Syncing public/assets to Cloudflare R2..."
+          aws s3 sync public/assets/ s3://images/assets/ \
+            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
+
+          echo "Syncing public/images to Cloudflare R2..."
+          aws s3 sync public/images/ s3://images/images/ \
+            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
+
+          echo "Sync complete!"

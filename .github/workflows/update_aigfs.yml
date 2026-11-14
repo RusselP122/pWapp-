@@ -48,19 +48,28 @@ jobs:
       - name: Run AIGFS 6h Precip + MSLP generator
         run: python precip_mslp_aigfs.py
 
+      - name: Upload AIGFS maps to Cloudflare R2
+        if: secrets.R2_ACCESS_KEY_ID != ''
+        env:
+          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: auto
+        run: |
+          aws s3 sync public/images/wind_aigfs/ s3://images/images/wind_aigfs/ \
+            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
+          aws s3 sync public/images/rainfall_aigfs/ s3://images/images/rainfall_aigfs/ \
+            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
+          aws s3 sync public/images/precip_mslp_aigfs/ s3://images/images/precip_mslp_aigfs/ \
+            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
+
       - name: Commit and push changes
         run: |
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Stage output images and metadata
-          git add -f public/images/wind_aigfs/*.png || true
+          # Stage only metadata JSON (images are hosted on Cloudflare R2)
           git add -f public/data/wind_aigfs_meta.json || true
-          
-          git add -f public/images/rainfall_aigfs/*.png || true
           git add -f public/data/rainfall_aigfs_meta.json || true
-          
-          git add -f public/images/precip_mslp_aigfs/*.png || true
           git add -f public/data/precip_mslp_aigfs_meta.json || true
 
           # Commit only if something changed

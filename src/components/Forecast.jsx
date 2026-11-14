@@ -21,14 +21,7 @@ import {
   Database,
   Keyboard
 } from "lucide-react";
-
-// Helper to resolve asset URLs relative to the base path in both local development and deployed production (subfolder) environments
-const getAssetUrl = (path) => {
-  if (!path) return null;
-  const base = import.meta.env.BASE_URL || "/";
-  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
-  return `${base}${cleanPath}`;
-};
+import { getAssetUrl } from "../utils/cdn";
 
 // Build dynamic date strings for today and yesterday in YYYY-MM-DD format (both UTC and local time)
 const getForecastDates = () => {
