@@ -1700,7 +1700,11 @@ def plot_model_tracks(
         deduped_track_dfs = [df_mean]
 
     plotted_members = len(deduped_track_dfs)
-    if total_ensemble_members in (63, 64):
+    if 'large' in model_name.lower():
+        total_ensemble_members = 1000
+    elif any(k in model_name.lower() for k in ['wncv3', 'wnv3', 'fnv3', 'oper']):
+        total_ensemble_members = 64
+    elif total_ensemble_members in (63, 64):
         total_ensemble_members = 64
     elif total_ensemble_members in (999, 1000):
         total_ensemble_members = 1000
@@ -2958,10 +2962,14 @@ def main():
         normalized_df = normalize_dataframe(raw_df)
         raw_members = normalized_df['sample'].nunique() if 'sample' in normalized_df.columns else 0
         pos_members = normalized_df[normalized_df['sample'] > 0]['sample'].nunique() if 'sample' in normalized_df.columns else 0
-        if raw_members in (63, 64) or pos_members in (63, 64):
-            total_members = 64
-        elif raw_members in (999, 1000) or pos_members in (999, 1000):
+        if 'large' in f_path.lower() or raw_members in (999, 1000) or pos_members in (999, 1000):
             total_members = 1000
+        elif any(k in f_path.lower() for k in ['wncv3', 'wnv3', 'fnv3', 'oper']) or raw_members in (63, 64) or pos_members in (63, 64):
+            total_members = 64
+        elif 'aifs' in f_path.lower():
+            total_members = 50
+        elif 'aigefs' in f_path.lower():
+            total_members = 31
         else:
             total_members = pos_members if pos_members > 0 else raw_members
             if total_members == 0:
