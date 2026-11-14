@@ -41,25 +41,13 @@ jobs:
       - name: Run GFS Wind + MSLP generator
         run: python wind_gfs.py
 
-      - name: Upload Wind GFS maps to Cloudflare R2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-        run: |
-          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-            echo "R2_ACCESS_KEY_ID not set, skipping R2 upload."
-            exit 0
-          fi
-          aws s3 sync public/images/wind_gfs/ s3://images/images/wind_gfs/ \
-            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
-
       - name: Commit and push changes
         run: |
           git config --global user.name  "github-actions[bot]"
           git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-          # Stage only metadata JSON (images are hosted on Cloudflare R2)
+          # Stage output images and metadata
+          git add -f public/images/wind_gfs/*.png || true
           git add -f public/data/wind_gfs_meta.json || true
 
           # Commit only if something changed

@@ -19,7 +19,14 @@ import {
   Compass,
   AlertCircle
 } from "lucide-react";
-import { getAssetUrl } from "../utils/cdn";
+
+// Asset URL helper to ensure compatibility in local dev and subpath production
+const getAssetUrl = (path) => {
+  if (!path) return "";
+  const base = import.meta.env.BASE_URL || "/";
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  return `${base}${cleanPath}`;
+};
 
 // Cycle metadata and Philippine Standard Time conversion
 const CYCLE_OPTIONS = [

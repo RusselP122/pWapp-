@@ -12,14 +12,6 @@
     ],
     "rewrites": [
         {
-            "source": "/assets/:file(.*\\.(?:png|jpg|jpeg|gif|webp|svg))",
-            "destination": "https://pub-040c32d81da842f1a99cc2a091e9d513.r2.dev/assets/:file"
-        },
-        {
-            "source": "/images/:path*",
-            "destination": "https://pub-040c32d81da842f1a99cc2a091e9d513.r2.dev/images/:path*"
-        },
-        {
             "source": "/api/earthquake-data",
             "destination": "https://data.garbinwx.org/api/earthquakes.json"
         },

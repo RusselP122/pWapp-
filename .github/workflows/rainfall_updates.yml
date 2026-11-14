@@ -49,26 +49,19 @@ jobs:
     - name: Run Precip + MSLP + Thickness Script (AIFS)
       run: python precip_mslp_aifs.py
 
-    - name: Upload forecast maps to Cloudflare R2
-      env:
-        AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-        AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-        AWS_DEFAULT_REGION: auto
-      run: |
-        if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-          echo "R2_ACCESS_KEY_ID not set, skipping R2 upload."
-          exit 0
-        fi
-        aws s3 sync public/images/ s3://images/images/ \
-          --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com
-
     - name: Commit and Push Changes
       run: |
         git config --global user.name "github-actions[bot]"
         git config --global user.email "github-actions[bot]@users.noreply.github.com"
 
-        # Stage only metadata JSON (images are hosted on Cloudflare R2)
-        git add -f 'public/data/*.json' 2>/dev/null || true
+        git add -f \
+          'public/images/rainfall/*.png' \
+          'public/images/wind/*.png' \
+          'public/images/precip_mslp/*.png' \
+          'public/images/precip_mslp_aifs/*.png' \
+          'public/images/rainfall/*.gif' \
+          'public/images/wind/*.gif' \
+          'public/data/*.json' 2>/dev/null || true
 
         if git diff --staged --quiet; then
           echo "No changes to commit"

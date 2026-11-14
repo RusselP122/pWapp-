@@ -78,20 +78,6 @@ jobs:
         run: |
           python generate_tc_positions_map.py
 
-      - name: Upload forecast images to Cloudflare R2
-        env:
-          AWS_ACCESS_KEY_ID: ${{ secrets.R2_ACCESS_KEY_ID }}
-          AWS_SECRET_ACCESS_KEY: ${{ secrets.R2_SECRET_ACCESS_KEY }}
-          AWS_DEFAULT_REGION: auto
-        run: |
-          if [ -z "$AWS_ACCESS_KEY_ID" ]; then
-            echo "R2_ACCESS_KEY_ID not set, skipping R2 upload."
-            exit 0
-          fi
-          aws s3 sync public/assets/ s3://images/assets/ \
-            --endpoint-url https://4f2279a209b84575e7c5d8c9d5c8f5fd.r2.cloudflarestorage.com \
-            --exclude "*" --include "*.png" --include "*.jpg" --include "*.jpeg"
-
       - name: Commit and push changes
         run: |
           git config --global user.name "github-actions[bot]"
@@ -103,7 +89,8 @@ jobs:
           # Stage all modifications and deletions of tracked files in public/data
           git add -u public/data/
 
-          # Add only data and manifest files (images are hosted on Cloudflare R2)
+          # Add forecast PNGs and the proxied CSVs for browser use
+          git add public/assets/*.png 2>/dev/null || true
           git add -f public/data/fnv3p2_latest.dat || true
           git add -f public/data/fnv3p2_paired_latest.dat || true
           git add -f public/data/fnv3p1_latest.dat || true

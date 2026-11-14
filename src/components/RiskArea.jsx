@@ -13,7 +13,13 @@ import {
   RotateCcw,
   X
 } from "lucide-react";
-import { getAssetUrl } from "../utils/cdn";
+
+// Helper to resolve asset URLs relative to the base path
+const getAssetUrl = (path) => {
+  const base = import.meta.env.BASE_URL || "/";
+  const cleanPath = path.startsWith("/") ? path.slice(1) : path;
+  return `${base}${cleanPath}`;
+};
 
 const VARIABLE_INFO = {
   track_probability: {
