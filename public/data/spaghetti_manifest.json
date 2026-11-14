@@ -609,7 +609,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-14T08:04:24.579085+00:00"
+    "timestamp": "2026-11-14T10:33:36.994568+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -623,7 +623,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-14T08:04:28.231010+00:00"
+    "timestamp": "2026-11-14T10:33:40.694511+00:00"
   },
   {
     "storm_id": "MONITORING_LPA03",
@@ -637,6 +637,6 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-14T08:04:30.446067+00:00"
+    "timestamp": "2026-11-14T10:33:42.921939+00:00"
   }
 ]
