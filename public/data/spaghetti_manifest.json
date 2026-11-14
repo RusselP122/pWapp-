@@ -597,7 +597,7 @@
     "is_monitoring": true,
     "region": "SULU SEA",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:37:37.862391+00:00"
+    "timestamp": "2026-11-14T17:57:50.899967+00:00"
   },
   {
     "storm_id": "MONITORING_LPA02",
@@ -611,7 +611,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:37:50.336681+00:00"
+    "timestamp": "2026-11-14T17:57:58.937819+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -625,7 +625,7 @@
     "is_monitoring": true,
     "region": "WEST OF PALAU",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:37:58.461772+00:00"
+    "timestamp": "2026-11-14T17:58:04.164848+00:00"
   },
   {
     "storm_id": "MONITORING_LPA03",
@@ -639,7 +639,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:38:02.689105+00:00"
+    "timestamp": "2026-11-14T17:58:06.925044+00:00"
   },
   {
     "storm_id": "MONITORING_LPA04",
@@ -653,7 +653,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:38:06.589869+00:00"
+    "timestamp": "2026-11-14T17:58:09.524331+00:00"
   },
   {
     "storm_id": "MONITORING_LPA06",
@@ -667,7 +667,7 @@
     "is_monitoring": true,
     "region": "SULU SEA",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:38:09.697387+00:00"
+    "timestamp": "2026-11-14T17:58:11.662000+00:00"
   },
   {
     "storm_id": "MONITORING_LPA05",
@@ -681,7 +681,7 @@
     "is_monitoring": true,
     "region": "SULU / CELEBES SEA",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:38:12.623274+00:00"
+    "timestamp": "2026-11-14T17:58:13.646303+00:00"
   },
   {
     "storm_id": "MONITORING_LPA07",
@@ -695,6 +695,6 @@
     "is_monitoring": true,
     "region": "CAROLINE ISLANDS",
     "basin": "WP",
-    "timestamp": "2026-11-14T13:38:14.956415+00:00"
+    "timestamp": "2026-11-14T17:58:15.274457+00:00"
   }
 ]
