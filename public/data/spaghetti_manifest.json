@@ -417,7 +417,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-15T13:42:59.314311+00:00"
+    "timestamp": "2026-11-15T18:48:00.818959+00:00"
   },
   {
     "storm_id": "MONITORING_LPA02",
@@ -431,7 +431,7 @@
     "is_monitoring": true,
     "region": "SOUTH CHINA SEA",
     "basin": "WP",
-    "timestamp": "2026-11-15T13:43:00.462073+00:00"
+    "timestamp": "2026-11-15T18:48:02.149923+00:00"
   },
   {
     "storm_id": "MONITORING_LPA02",
@@ -445,7 +445,7 @@
     "is_monitoring": true,
     "region": "SOUTH CHINA SEA",
     "basin": "WP",
-    "timestamp": "2026-11-15T13:43:05.374814+00:00"
+    "timestamp": "2026-11-15T18:48:08.256557+00:00"
   },
   {
     "storm_id": "MONITORING_LPA03",
@@ -459,7 +459,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-15T13:43:07.022333+00:00"
+    "timestamp": "2026-11-15T18:48:10.231339+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -473,7 +473,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-15T13:43:10.366785+00:00"
+    "timestamp": "2026-11-15T18:48:14.375438+00:00"
   },
   {
     "storm_id": "MONITORING_LPA04",
@@ -487,6 +487,6 @@
     "is_monitoring": true,
     "region": "SOUTH CHINA SEA",
     "basin": "WP",
-    "timestamp": "2026-11-15T13:43:11.993401+00:00"
+    "timestamp": "2026-11-15T18:48:16.282488+00:00"
   }
 ]
