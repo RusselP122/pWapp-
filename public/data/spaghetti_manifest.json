@@ -1,47 +1,5 @@
 [
   {
-    "storm_id": "MONITORING_LPA02",
-    "atcf_id": "LPA02",
-    "init_date": "20261114",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA02_20261114T00Z",
-    "filename": "MONITORING_LPA02_20261114_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA02_20261114_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "MICRONESIA",
-    "basin": "WP",
-    "timestamp": "2026-11-14T10:33:36.994568+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261114",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261114T00Z",
-    "filename": "MONITORING_LPA01_20261114_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261114_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "MICRONESIA",
-    "basin": "WP",
-    "timestamp": "2026-11-14T10:33:40.694511+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA03",
-    "atcf_id": "LPA03",
-    "init_date": "20261114",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA03_20261114T00Z",
-    "filename": "MONITORING_LPA03_20261114_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA03_20261114_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "MICRONESIA",
-    "basin": "WP",
-    "timestamp": "2026-11-14T10:33:42.921939+00:00"
-  },
-  {
     "storm_id": "MONITORING_LPA01",
     "atcf_id": "LPA01",
     "init_date": "20261114",
@@ -334,5 +292,47 @@
     "region": "MICRONESIA",
     "basin": "WP",
     "timestamp": "2026-11-16T06:11:52.392849+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261116",
+    "cycle": "00Z",
+    "model": "gdm_wncv3",
+    "unique_key": "MONITORING_LPA01_20261116T00Z",
+    "filename": "MONITORING_LPA01_20261116_00Z_gdm_wncv3.png",
+    "alt_filename": "MONITORING_LPA01_20261116_00Z_gdm_wncv3.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-16T07:47:25.917101+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261116",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261116T00Z",
+    "filename": "MONITORING_LPA01_20261116_00Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261116_00Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-16T07:47:32.960597+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA02",
+    "atcf_id": "LPA02",
+    "init_date": "20261116",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA02_20261116T00Z",
+    "filename": "MONITORING_LPA02_20261116_00Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA02_20261116_00Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-16T07:47:35.430624+00:00"
   }
 ]
