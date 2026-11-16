@@ -263,7 +263,7 @@
     "is_monitoring": true,
     "region": "CAROLINE ISLANDS",
     "basin": "WP",
-    "timestamp": "2026-11-16T21:38:29.897476+00:00"
+    "timestamp": "2026-11-16T21:58:34.231893+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -277,7 +277,7 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-16T21:38:32.718085+00:00"
+    "timestamp": "2026-11-16T21:58:37.131268+00:00"
   },
   {
     "storm_id": "MONITORING_LPA03",
@@ -291,6 +291,6 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-16T21:38:34.130873+00:00"
+    "timestamp": "2026-11-16T21:58:38.592583+00:00"
   }
 ]
