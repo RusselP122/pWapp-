@@ -3,20 +3,6 @@
     "storm_id": "MONITORING_LPA01",
     "atcf_id": "LPA01",
     "init_date": "20261115",
-    "cycle": "12Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261115T12Z",
-    "filename": "MONITORING_LPA01_20261115_12Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261115_12Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "MICRONESIA",
-    "basin": "WP",
-    "timestamp": "2026-11-15T22:15:23.602421+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261115",
     "cycle": "18Z",
     "model": "gdm_wnc_large",
     "unique_key": "MONITORING_LPA01_20261115T18Z",
@@ -221,7 +207,7 @@
     "is_monitoring": true,
     "region": "SOUTH CHINA SEA",
     "basin": "WP",
-    "timestamp": "2026-11-17T14:28:34.769054+00:00"
+    "timestamp": "2026-11-17T20:49:36.315420+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -278,5 +264,33 @@
     "region": "MICRONESIA",
     "basin": "WP",
     "timestamp": "2026-11-17T14:28:58.979650+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261117",
+    "cycle": "12Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261117T12Z",
+    "filename": "MONITORING_LPA01_20261117_12Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261117_12Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "SOUTH CHINA SEA",
+    "basin": "WP",
+    "timestamp": "2026-11-17T20:49:39.457065+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA02",
+    "atcf_id": "LPA02",
+    "init_date": "20261117",
+    "cycle": "12Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA02_20261117T12Z",
+    "filename": "MONITORING_LPA02_20261117_12Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA02_20261117_12Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-17T20:49:41.067772+00:00"
   }
 ]
