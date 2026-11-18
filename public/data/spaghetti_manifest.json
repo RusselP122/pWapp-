@@ -1,47 +1,5 @@
 [
   {
-    "storm_id": "MONITORING_LPA02",
-    "atcf_id": "LPA02",
-    "init_date": "20261116",
-    "cycle": "12Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA02_20261116T12Z",
-    "filename": "MONITORING_LPA02_20261116_12Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA02_20261116_12Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "CAROLINE ISLANDS",
-    "basin": "WP",
-    "timestamp": "2026-11-16T21:58:34.231893+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261116",
-    "cycle": "12Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261116T12Z",
-    "filename": "MONITORING_LPA01_20261116_12Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261116_12Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "MICRONESIA",
-    "basin": "WP",
-    "timestamp": "2026-11-16T21:58:37.131268+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA03",
-    "atcf_id": "LPA03",
-    "init_date": "20261116",
-    "cycle": "12Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA03_20261116T12Z",
-    "filename": "MONITORING_LPA03_20261116_12Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA03_20261116_12Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "MICRONESIA",
-    "basin": "WP",
-    "timestamp": "2026-11-16T21:58:38.592583+00:00"
-  },
-  {
     "storm_id": "MONITORING_LPA01",
     "atcf_id": "LPA01",
     "init_date": "20261116",
@@ -292,5 +250,33 @@
     "region": "SOUTH CHINA SEA",
     "basin": "WP",
     "timestamp": "2026-11-18T13:42:33.917548+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261118",
+    "cycle": "12Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261118T12Z",
+    "filename": "MONITORING_LPA01_20261118_12Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261118_12Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-18T20:26:07.070225+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA02",
+    "atcf_id": "LPA02",
+    "init_date": "20261118",
+    "cycle": "12Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA02_20261118T12Z",
+    "filename": "MONITORING_LPA02_20261118_12Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA02_20261118_12Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "SOUTH CHINA SEA",
+    "basin": "WP",
+    "timestamp": "2026-11-18T20:26:08.912678+00:00"
   }
 ]
