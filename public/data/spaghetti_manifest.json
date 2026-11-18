@@ -263,6 +263,34 @@
     "is_monitoring": true,
     "region": "MICRONESIA",
     "basin": "WP",
-    "timestamp": "2026-11-18T07:11:45.646924+00:00"
+    "timestamp": "2026-11-18T08:07:48.774165+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261118",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261118T00Z",
+    "filename": "MONITORING_LPA01_20261118_00Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261118_00Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-18T08:07:54.315991+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA02",
+    "atcf_id": "LPA02",
+    "init_date": "20261118",
+    "cycle": "00Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA02_20261118T00Z",
+    "filename": "MONITORING_LPA02_20261118_00Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA02_20261118_00Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-18T08:07:57.027091+00:00"
   }
 ]
