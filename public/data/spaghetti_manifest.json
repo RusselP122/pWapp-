@@ -3,20 +3,6 @@
     "storm_id": "MONITORING_LPA01",
     "atcf_id": "LPA01",
     "init_date": "20261117",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261117T00Z",
-    "filename": "MONITORING_LPA01_20261117_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261117_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "MICRONESIA",
-    "basin": "WP",
-    "timestamp": "2026-11-17T07:58:55.610221+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261117",
     "cycle": "06Z",
     "model": "gdm_wncv3",
     "unique_key": "MONITORING_LPA01_20261117T06Z",
@@ -278,5 +264,47 @@
     "region": "SOUTH CHINA SEA",
     "basin": "WP",
     "timestamp": "2026-11-19T02:57:55.892974+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA02",
+    "atcf_id": "LPA02",
+    "init_date": "20261119",
+    "cycle": "06Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA02_20261119T06Z",
+    "filename": "MONITORING_LPA02_20261119_06Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA02_20261119_06Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "MICRONESIA",
+    "basin": "WP",
+    "timestamp": "2026-11-19T13:55:31.320589+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA03",
+    "atcf_id": "LPA03",
+    "init_date": "20261119",
+    "cycle": "06Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA03_20261119T06Z",
+    "filename": "MONITORING_LPA03_20261119_06Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA03_20261119_06Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "SOUTH CHINA SEA",
+    "basin": "WP",
+    "timestamp": "2026-11-19T13:55:33.393567+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261119",
+    "cycle": "06Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261119T06Z",
+    "filename": "MONITORING_LPA01_20261119_06Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261119_06Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "CAROLINE ISLANDS",
+    "basin": "WP",
+    "timestamp": "2026-11-19T13:55:35.664114+00:00"
   }
 ]
