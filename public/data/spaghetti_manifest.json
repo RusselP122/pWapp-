@@ -2,20 +2,6 @@
   {
     "storm_id": "MONITORING_LPA01",
     "atcf_id": "LPA01",
-    "init_date": "20261120",
-    "cycle": "06Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261120T06Z",
-    "filename": "MONITORING_LPA01_20261120_06Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261120_06Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "SOUTH CHINA SEA",
-    "basin": "WP",
-    "timestamp": "2026-11-20T13:53:17.571313+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
     "init_date": "20261121",
     "cycle": "00Z",
     "model": "gdm_wnc_large",
@@ -124,5 +110,19 @@
     "region": "WEST OF PALAU",
     "basin": "WP",
     "timestamp": "2026-11-24T13:46:47.821722+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261124",
+    "cycle": "12Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261124T12Z",
+    "filename": "MONITORING_LPA01_20261124_12Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261124_12Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "PALAU VICINITY",
+    "basin": "WP",
+    "timestamp": "2026-11-24T22:19:44.952071+00:00"
   }
 ]
