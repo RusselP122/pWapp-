@@ -2,20 +2,6 @@
   {
     "storm_id": "MONITORING_LPA01",
     "atcf_id": "LPA01",
-    "init_date": "20261121",
-    "cycle": "00Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261121T00Z",
-    "filename": "MONITORING_LPA01_20261121_00Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261121_00Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "PHILIPPINE SEA",
-    "basin": "WP",
-    "timestamp": "2026-11-21T07:41:50.786003+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
     "init_date": "20261122",
     "cycle": "00Z",
     "model": "gdm_wnc_large",
@@ -124,5 +110,47 @@
     "region": "PALAU VICINITY",
     "basin": "WP",
     "timestamp": "2026-11-24T22:19:44.952071+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261124",
+    "cycle": "18Z",
+    "model": "gdm_wncv3",
+    "unique_key": "MONITORING_LPA01_20261124T18Z",
+    "filename": "MONITORING_LPA01_20261124_18Z_gdm_wncv3.png",
+    "alt_filename": "MONITORING_LPA01_20261124_18Z_gdm_wncv3.png",
+    "is_monitoring": true,
+    "region": "WEST OF PALAU",
+    "basin": "WP",
+    "timestamp": "2026-11-25T01:33:07.129526+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA02",
+    "atcf_id": "LPA02",
+    "init_date": "20261124",
+    "cycle": "18Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA02_20261124T18Z",
+    "filename": "MONITORING_LPA02_20261124_18Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA02_20261124_18Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "SOUTH CHINA SEA",
+    "basin": "WP",
+    "timestamp": "2026-11-25T01:33:08.794872+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261124",
+    "cycle": "18Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261124T18Z",
+    "filename": "MONITORING_LPA01_20261124_18Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261124_18Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "PALAU VICINITY",
+    "basin": "WP",
+    "timestamp": "2026-11-25T01:33:10.046686+00:00"
   }
 ]
