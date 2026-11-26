@@ -1,33 +1,5 @@
 [
   {
-    "storm_id": "MONITORING_LPA02",
-    "atcf_id": "LPA02",
-    "init_date": "20261124",
-    "cycle": "06Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA02_20261124T06Z",
-    "filename": "MONITORING_LPA02_20261124_06Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA02_20261124_06Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "EAST OF PALAU",
-    "basin": "WP",
-    "timestamp": "2026-11-24T13:46:45.270883+00:00"
-  },
-  {
-    "storm_id": "MONITORING_LPA01",
-    "atcf_id": "LPA01",
-    "init_date": "20261124",
-    "cycle": "06Z",
-    "model": "gdm_wnc_large",
-    "unique_key": "MONITORING_LPA01_20261124T06Z",
-    "filename": "MONITORING_LPA01_20261124_06Z_gdm_wnc_large.png",
-    "alt_filename": "MONITORING_LPA01_20261124_06Z_gdm_wnc_large.png",
-    "is_monitoring": true,
-    "region": "WEST OF PALAU",
-    "basin": "WP",
-    "timestamp": "2026-11-24T13:46:47.821722+00:00"
-  },
-  {
     "storm_id": "MONITORING_LPA01",
     "atcf_id": "LPA01",
     "init_date": "20261124",
@@ -278,5 +250,61 @@
     "region": "WEST OF PALAU",
     "basin": "WP",
     "timestamp": "2026-11-26T08:04:29.468577+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261126",
+    "cycle": "06Z",
+    "model": "gdm_wncv3",
+    "unique_key": "MONITORING_LPA01_20261126T06Z",
+    "filename": "MONITORING_LPA01_20261126_06Z_gdm_wncv3.png",
+    "alt_filename": "MONITORING_LPA01_20261126_06Z_gdm_wncv3.png",
+    "is_monitoring": true,
+    "region": "WEST OF PALAU",
+    "basin": "WP",
+    "timestamp": "2026-11-26T13:26:03.120599+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA01",
+    "atcf_id": "LPA01",
+    "init_date": "20261126",
+    "cycle": "06Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA01_20261126T06Z",
+    "filename": "MONITORING_LPA01_20261126_06Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA01_20261126_06Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "EAST OF PALAU",
+    "basin": "WP",
+    "timestamp": "2026-11-26T13:26:14.881822+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA02",
+    "atcf_id": "LPA02",
+    "init_date": "20261126",
+    "cycle": "06Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA02_20261126T06Z",
+    "filename": "MONITORING_LPA02_20261126_06Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA02_20261126_06Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "WEST OF PALAU",
+    "basin": "WP",
+    "timestamp": "2026-11-26T13:26:18.772448+00:00"
+  },
+  {
+    "storm_id": "MONITORING_LPA03",
+    "atcf_id": "LPA03",
+    "init_date": "20261126",
+    "cycle": "06Z",
+    "model": "gdm_wnc_large",
+    "unique_key": "MONITORING_LPA03_20261126T06Z",
+    "filename": "MONITORING_LPA03_20261126_06Z_gdm_wnc_large.png",
+    "alt_filename": "MONITORING_LPA03_20261126_06Z_gdm_wnc_large.png",
+    "is_monitoring": true,
+    "region": "CAROLINE ISLANDS",
+    "basin": "WP",
+    "timestamp": "2026-11-26T13:26:20.997402+00:00"
   }
 ]
