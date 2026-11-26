@@ -34,15 +34,15 @@ $$\begin{aligned}
 \end{aligned}$$
 
 | Brightness Index ($B$) | Temperature ($T$) | RBTOP Color Theme | Meteorological Interpretation |
-| :---: | :---: | :---: | :--- |
+| :---: | :---: | :--- | :--- |
 | **0 – 144** | $+56.9^\circ\text{C} \text{ to } -15.1^\circ\text{C}$ | Monochromatic Grayscale | Warmer lower clouds, sea surface, low stratus |
-| **145 – 170** | $-15.6^\circ\text{C} \text{ to } -28.1^\circ\text{C}$ | Cyan / Light Blue | Emerging moderate convection |
+| **145 – 170** | $-15.6^\circ\text{C} \text{ to } -28.1^\circ\text{C}$ | Purple / Blue | Emerging moderate convection |
 | **171 – 190** | $-28.6^\circ\text{C} \text{ to } -38.0^\circ\text{C}$ | Blue-Green / Emerald | Deepening convective canopy |
 | **191 – 200** | $-39.0^\circ\text{C} \text{ to } -48.0^\circ\text{C}$ | Bright Green | Intense convective updrafts |
-| **201 – 210** | $-49.0^\circ\text{C} \text{ to } -58.0^\circ\text{C}$ | Yellow | Severe tropical convection |
-| **211 – 220** | $-59.0^\circ\text{C} \text{ to } -68.0^\circ\text{C}$ | Bright Red | Very deep convection / eyewall core |
-| **221 – 244** | $-69.0^\circ\text{C} \text{ to } -92.0^\circ\text{C}$ | Magenta / Deep Violet | Intense overshooting cloud tops |
-| **245 – 255** | $-93.0^\circ\text{C} \text{ to } -110.2^\circ\text{C}$ | White to Black | Extreme tropospheric penetration / CDO core |
+| **201 – 210** | $-49.0^\circ\text{C} \text{ to } -58.0^\circ\text{C}$ | Yellow-Orange | Severe tropical convection |
+| **211 – 220** | $-59.0^\circ\text{C} \text{ to } -75.2^\circ\text{C}$ | Red to Black Ring | Very deep convection / eyewall core |
+| **221 – 245** | $-76.2^\circ\text{C} \text{ to } -100.2^\circ\text{C}$ | Dark Gray to White | Intense overshooting cloud tops |
+| **246 – 255** | $-101.2^\circ\text{C} \text{ to } -110.2^\circ\text{C}$ | Pure White | Extreme tropospheric penetration / CDO core |
 
 ---
 
@@ -75,8 +75,8 @@ By default, the processor generates publication-grade presentation composite map
   - Brand: **`PHILIPPINE TYPHOON/WEATHER`** (bold black, right-aligned)
   - Storm Identifier & Intensity: **`30W.IN-FA | 115kt, 948mb`** (auto-resolved from ATCF live data)
 - **Geographic Gridlines & Subtle Boundaries**:
-  - **Country Borders & Coastlines**: Subtle white/light gray hairline (~0.5 pt, RGB `(255, 255, 255)` with calibrated opacity `0.60` / alpha 153) drawn over the satellite frame using Cartopy Natural Earth 50m boundaries and coastlines, cached in memory for zero GIF latency.
-  - **Philippine Provincial Boundaries**: Ultra-fine light gray hairlines (~0.3 pt, RGB `(225, 230, 235)` with opacity `0.55`) outlining all 82 Philippine provinces.
+  - **Country Borders & Coastlines**: Cased golden-yellow hairline (`#FFE132` with dark contrast halo) drawn over the satellite frame using `ph_provinces.json` exterior coastlines and 10m Natural Earth regional borders/coastlines, cached in memory for zero GIF latency.
+  - **Philippine Provincial Boundaries & Labels**: Cased off-white provincial boundaries outlining all 82 Philippine provinces, paired with collision-free dot markers and haloed province name labels (`--no-province-labels` to hide).
   - **Thin Faint Dotted Gridlines**: Single 1px dots spaced across the frame with faint alpha ~0.35 (`(255, 255, 255, 90)`), indicating coordinates without obscuring cloud-top convective textures or eyewall dynamics.
   - Exterior latitude labels on left margin (`18°N`, `20°N`, `22°N`, `24°N`, `26°N`).
   - Exterior longitude labels on bottom margin (`138°E`, `140°E`, `142°E`, `144°E`, `146°E`).
@@ -170,24 +170,24 @@ python himawari_philippines_sandwich.py --target visayas --gif --hours 2 --inter
 
 | Philippine Sector | Target Extent | Regional Coverage Focus |
 | :--- | :---: | :--- |
-| **`northern_luzon`** | $800 \times 800\text{ km}$ | Ilocos, Cordillera, Cagayan Valley, Batanes & Babuyan Islands |
-| **`southern_luzon`** | $800 \times 800\text{ km}$ | Metro Manila (NCR), CALABARZON, Central Luzon, MIMAROPA, Bicol |
-| **`visayas`** | $700 \times 700\text{ km}$ | Western Visayas, Central Visayas, Eastern Visayas |
-| **`mindanao`** | $850 \times 850\text{ km}$ | Davao, Northern Mindanao, Caraga, SOCCSKSARGEN, BARMM, Zamboanga |
-| **`philippines`** | $1,800 \times 1,800\text{ km}$ | Philippine Archipelago & PAR Regional Domain |
+| **`northern_luzon`** | $700 \times 700\text{ km}$ | Ilocos, Cordillera, Cagayan Valley, Batanes & Babuyan Islands |
+| **`southern_luzon`** | $800 \times 800\text{ km}$ | NCR, Central Luzon, CALABARZON, MIMAROPA, Bicol |
+| **`visayas`** | $600 \times 600\text{ km}$ | Western Visayas, Central Visayas, Eastern Visayas |
+| **`mindanao`** | $850 \times 850\text{ km}$ | Davao, Northern Mindanao, Caraga, SOCCSKSARGEN, Zamboanga, BARMM |
+| **`philippines`** | $2,350 \times 2,350\text{ km}$ | Philippine Archipelago & Official PAR Boundary |
 
 ### Command-Line Arguments Reference
 
 | Argument | Type | Default | Description |
 | :--- | :---: | :---: | :--- |
 | `--crop-km` | float | **`1500.0`** | Storm crop width & height in kilometers (1,500 km optimal sweet spot) |
-| `--resolution`| float | **`750.0`** | Output grid spacing in meters ($2,000 \times 2,000\text{ px}$ satellite frame) |
+| `--resolution`| float | **`750.0` / `500.0`** | Output grid spacing in meters (`750 m` storm-centered; `500 m` regional / `1000 m` PAR in `himawari_philippines_sandwich.py`) |
 | `--view` | choice | `overview` | Storm-centered view (`overview`: 1500 km sweet spot, `zoomout`/`wide`: 2000 km, `detail`: 500 km, `both`, `all`) |
 | `--gif` | flag | `False` | Generate animated satellite GIF loop (renders frames in memory and outputs ONLY the `.gif` file) |
 | `--save-frames`| flag | `False` | When generating GIF, also save individual presentation PNG files to output folder |
 | `--no-borders` | flag | `False` | Disable country borders and coastlines overlay on satellite composite |
-| `--border-color`| string | `yellow` | Country border and coastline color (`yellow` / `#FFE600` or custom color) |
-| `--border-width`| float | `auto` | Country border line width in pixels (default: auto-scaled 1.5 px) |
+| `--border-color`| string | `yellow` | Country border and coastline color (`yellow` / `#FFE132` with dark casing, or custom color) |
+| `--border-width`| float | `auto` | Country border line width in pixels (default: auto-scaled hairline) |
 | `--hours` | float | `1.0` | Timeframe in hours for GIF loop (e.g. `1.0`, `3.0`, `6.0`) |
 | `--interval` | int | `10` | Frame step interval in minutes for GIF loop (e.g. `10`, `20`, `30`) |
 | `--fps` | int | `8` | Frames per second for animated GIF playback |
