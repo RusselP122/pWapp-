@@ -87,8 +87,9 @@ jobs:
 
           python scripts/obfuscate_csvs.py
 
-          # Stage all modifications and deletions of tracked files in public/data
+          # Stage all modifications and deletions of tracked files in public/data and public/assets
           git add -u public/data/
+          git add -u public/assets/
 
           # Add forecast PNGs and the proxied CSVs for browser use
           git add public/assets/fnv3_*.png 2>/dev/null || true
