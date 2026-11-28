@@ -249,7 +249,7 @@
     "is_monitoring": true,
     "region": "PALAU VICINITY",
     "basin": "WP",
-    "timestamp": "2026-11-28T07:35:21.411687+00:00"
+    "timestamp": "2026-11-28T07:39:01.038333+00:00"
   },
   {
     "storm_id": "MONITORING_LPA01",
@@ -263,6 +263,6 @@
     "is_monitoring": true,
     "region": "WEST OF PALAU",
     "basin": "WP",
-    "timestamp": "2026-11-28T07:35:24.997599+00:00"
+    "timestamp": "2026-11-28T07:39:04.600506+00:00"
   }
 ]
